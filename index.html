@@ -281,6 +281,25 @@ h1 em { font-weight: 500; }
 @media (prefers-reduced-motion: reduce) {
   .lift, .book, .slot::after { transition-duration: .01s; transition-delay: 0s !important; }
 }
+
+/* Edit mode (open the page with ?edit). Hidden from normal visitors. */
+.card-edit { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.card-edit[hidden], .card-edit [hidden], .editbar[hidden], .editbar [hidden] { display: none; }
+.edit-status { margin: 0; flex: 1 1 200px; font-size: 13px; color: var(--muted); }
+.edit-status.err { color: #b3261e; }
+.edit-status a { color: inherit; }
+.editbar {
+  position: fixed; top: 10px; right: 10px; z-index: 60; max-width: min(360px, calc(100vw - 20px));
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 10px 12px; background: var(--card); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 10px 28px -10px rgba(0,0,0,.45);
+  font: 14px / 1.35 var(--font-ui);
+}
+.editbar b { font-weight: 700; }
+.editbar a { color: var(--accent); font-weight: 700; }
+.editbar input { flex: 1 1 180px; min-height: 36px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 6px; background: transparent; color: var(--ink); font: inherit; }
+.editbar .btn { min-height: 36px; }
+.editbar .edit-status { flex-basis: 100%; }
 </style>
 
 <div class="wrap">
@@ -306,7 +325,25 @@ h1 em { font-weight: 500; }
     <a class="btn" id="cLink" target="_blank" rel="noopener noreferrer">View on Goodreads <span aria-hidden="true">&nbsp;↗</span></a>
     <button class="btn ghost" id="cBack" type="button">Put back</button>
   </div>
+  <div class="card-edit" id="cEdit" hidden>
+    <button class="btn ghost" id="eChange" type="button">Change cover…</button>
+    <button class="btn" id="eSave" type="button" hidden>Save to GitHub</button>
+    <button class="btn ghost" id="eCancel" type="button" hidden>Cancel</button>
+    <input type="file" id="eFile" accept="image/jpeg,image/png,image/webp" hidden>
+    <p class="edit-status" id="eStatus" role="status"></p>
+  </div>
 </aside>
+
+<div class="editbar" id="editbar" hidden>
+  <div id="ebOn" hidden><b>Edit mode</b> · connected to GitHub <button class="btn ghost" id="ebForget" type="button">Disconnect</button></div>
+  <form id="ebForm" hidden>
+    <b>Edit mode.</b> Paste a GitHub token to save covers
+    (<a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">make one</a>):
+    <input type="password" id="ebToken" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="GitHub token">
+    <button class="btn" type="submit">Connect</button>
+  </form>
+  <p class="edit-status" id="ebStatus" role="status"></p>
+</div>
 
 <script>
 (function () {
@@ -321,7 +358,7 @@ h1 em { font-weight: 500; }
      ------------------------------------------------------------------ */
   const YEAR = 2026;
   const YEARS = [2026, 2025];
-  const DATA = {"2026":[{"title":"The Age of Innocence","author":"Edith Wharton","last":"Wharton","finished":"2026-01-01","id":"22498786","year":2026,"pages":204,"rating":3.0,"spine":"books/aoi-spine.jpg","cover":"books/aoi-cover.jpg","sr":0.181,"cr":0.646},{"title":"Gilead","author":"Marilynne Robinson","last":"Robinson","finished":"2026-01-01","id":"127918224","year":2026,"rating":3.0,"spine":"books/gilead-spine.jpg","cover":"books/gilead-cover.jpg","sr":0.117,"cr":0.64},{"title":"Much Obliged, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-01-01","id":"16394","year":2026,"pages":208,"rating":4.0,"spine":"books/jtb-spine.jpg","cover":"books/jtb-cover.jpg","sr":0.076,"cr":0.677},{"title":"The Shipping News","author":"Annie Proulx","last":"Proulx","finished":"2026-01-27","id":"7354","year":2026,"pages":337,"rating":4.0,"spine":"books/ship-spine.jpg","cover":"books/ship-cover.jpg","sr":0.105,"cr":0.665},{"title":"Rabbit Is Rich","author":"John Updike","last":"Updike","finished":"2026-02-01","id":"85391","year":2026,"pages":480,"rating":5.0,"spine":"books/rir-spine.jpg","sr":0.205,"cover":"books/rir-cover.jpg","cr":0.66},{"title":"Demon Copperhead","author":"Barbara Kingsolver","last":"Kingsolver","finished":"2026-02-01","id":"60194162","year":2026,"pages":560,"rating":5.0,"cover":"books/demon-cover.jpg","cr":0.706,"spine":"books/dc-spine.jpg","sr":0.115},{"title":"Blandings Castle","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"13707660","year":2026,"pages":272,"rating":3.0,"spine":"books/bl-spine.jpg","sr":0.191,"cover":"books/bl-cover.jpg","cr":0.614},{"title":"Football","author":"Chuck Klosterman","last":"Klosterman","finished":"2026-02-01","id":"239522729","year":2026,"pages":304,"rating":3.0,"cover":"books/football-cover.jpg","cr":0.655,"spine":"books/football-spine.jpg","sr":0.115},{"title":"Aunts Aren't Gentlemen","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"720987","year":2026,"pages":167,"rating":4.0,"spine":"books/aunts-spine.jpg","sr":0.15,"cover":"books/aunts-cover.jpg","cr":0.63},{"title":"Ficciones","author":"Jorge Luis Borges","last":"Borges","finished":"2026-03-01","id":"426504","year":2026,"pages":174,"rating":3.0,"spine":"books/fic-spine.jpg","sr":0.14,"cover":"books/fic-cover.jpg","cr":0.64},{"title":"Summer Lightning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-03-01","id":"13707659","year":2026,"pages":288,"rating":3.0,"spine":"books/sl-spine.jpg","sr":0.18,"cover":"books/sl-cover.jpg","cr":0.62},{"title":"The Stone Diaries","author":"Carol Shields","last":"Shields","finished":"2026-03-01","id":"77554","year":2026,"pages":361,"rating":4.0,"spine":"books/st-spine.jpg","sr":0.18,"cover":"books/st-cover.jpg","cr":0.665},{"title":"Rabbit at Rest","author":"John Updike","last":"Updike","finished":"2026-03-01","id":"11666","year":2026,"pages":606,"rating":5.0,"spine":"books/rar-spine.jpg","cover":"books/rar-cover.jpg","sr":0.217,"cr":0.649},{"title":"Oranges","author":"John McPhee","last":"McPhee","finished":"2026-04-01","id":"54983","year":2026,"pages":160,"rating":4.0,"cover":"books/54983-cover.jpg","cr":0.655},{"title":"Heavy Weather","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707658","year":2026,"pages":288,"rating":4.0,"spine":"books/hw-spine.jpg","sr":0.119,"cover":"books/hw-cover.jpg","cr":0.66},{"title":"The Orphan Master's Son","author":"Adam Johnson","last":"Johnson","finished":"2026-04-01","id":"11529868","year":2026,"pages":443,"rating":4.0,"cover":"books/11529868-cover.jpg","cr":0.67},{"title":"Uncle Fred in the Springtime","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707721","year":2026,"pages":242,"rating":4.0,"cover":"books/13707721-cover.jpg","cr":0.715,"spine":"books/13707721-spine.jpg","sr":0.15},{"title":"Main Street","author":"Sinclair Lewis","last":"Lewis","finished":"2026-05-01","id":"11376","year":2026,"pages":454,"rating":4.0,"cover":"books/11376-cover.jpg","cr":0.634},{"title":"The Sellout","author":"Paul Beatty","last":"Beatty","finished":"2026-05-01","id":"22237161","year":2026,"pages":289,"rating":4.0,"cover":"books/22237161-cover.jpg","cr":0.666},{"title":"Meet Mr. Mulliner","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-05-01","id":"18053","year":2026,"pages":203,"rating":3.0,"cover":"books/18053-cover.jpg","cr":0.682},{"title":"The Netanyahus","author":"Joshua Cohen","last":"Cohen","finished":"2026-05-01","id":"55817233","year":2026,"pages":240,"rating":3.0,"cover":"books/55817233-cover.jpg","cr":0.675},{"title":"Middlesex","author":"Jeffrey Eugenides","last":"Eugenides","finished":"2026-06-01","id":"2187","year":2026,"pages":529,"rating":5.0,"cover":"books/2187-cover.jpg","cr":0.648,"spine":"books/2187-spine.jpg","sr":0.22},{"title":"Less","author":"Andrew Sean Greer","last":"Greer","finished":"2026-06-01","id":"39927096","year":2026,"pages":273,"rating":3.0,"cover":"books/39927096-cover.jpg","cr":0.646},{"title":"Full Moon","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-06-01","id":"16376","year":2026,"pages":272,"rating":3.0,"cover":"books/16376-cover.jpg","cr":0.66},{"title":"Redshirts","author":"John Scalzi","last":"Scalzi","finished":"2026-06-01","id":"13055592","year":2026,"pages":320,"rating":4.0,"cover":"books/13055592-cover.jpg","cr":0.662},{"title":"The Overstory","author":"Richard Powers","last":"Powers","finished":"2026-07-01","id":"40180098","year":2026,"pages":502,"rating":4.0,"cover":"books/40180098-cover.jpg","cr":0.666,"spine":"books/40180098-spine.jpg","sr":0.21},{"title":"Mr. Mulliner Speaking","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-07-01","id":"18041","year":2026,"pages":232,"rating":4.0,"cover":"books/18041-cover.jpg","cr":0.68},{"title":"Cathedral","author":"Raymond Carver","last":"Carver","finished":"2026-07-01","id":"138758152","year":2026,"rating":4.0},{"title":"White Noise","author":"Don DeLillo","last":"DeLillo","finished":"2026-07-01","id":"28251250","year":2026,"pages":320,"rating":2.0,"cover":"books/28251250-cover.jpg","cr":0.66,"spine":"books/28251250-spine.jpg","sr":0.17},{"title":"Decline and Fall","author":"Evelyn Waugh","last":"Waugh","finished":"2026-08-01","id":"30929","year":2026,"pages":300,"rating":3.0,"cover":"books/30929-cover.jpg","cr":0.666},{"title":"In the Distance","author":"Hernan Diaz","last":"Diaz","finished":"2026-08-01","id":"34381330","year":2026,"pages":256,"rating":4.0,"cover":"books/34381330-cover.jpg","cr":0.666},{"title":"Young Men in Spats","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-08-01","id":"16241167","year":2026,"pages":240,"rating":5.0,"cover":"books/16241167-cover.jpg","cr":0.67},{"title":"The Sweetness at the Bottom of the Pie","author":"Alan Bradley","last":"Bradley","finished":"2026-08-01","id":"40605285","year":2026,"pages":386,"rating":3.0,"cover":"books/40605285-cover.jpg","cr":0.582},{"title":"The Goldfinch","author":"Donna Tartt","last":"Tartt","finished":"2026-09-01","id":"17333223","year":2026,"pages":775,"rating":4.0,"cover":"books/17333223-cover.jpg","cr":0.647,"spine":"books/17333223-spine.jpg","sr":0.24},{"title":"Here Is New York","author":"E.B. White","last":"White","finished":"2026-09-01","id":"10814","year":2026,"pages":56,"rating":4.0,"cover":"books/10814-cover.jpg","cr":0.703},{"title":"Pigs Have Wings","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"60521","year":2026,"pages":240,"rating":4.0,"cover":"books/60521-cover.jpg","cr":0.604},{"title":"Dungeon Crawler Carl","author":"Matt Dinniman","last":"Dinniman","finished":"2026-09-01","id":"211721806","year":2026,"pages":450,"rating":3.0,"cover":"books/211721806-cover.jpg","cr":0.662},{"title":"Sisters of a Halved Heart","author":"Nayantara Roy","last":"Roy","finished":"2026-09-01","id":"242445364","year":2026,"pages":352,"rating":3.0},{"title":"The Stalker","author":"Paula Bomer","last":"Bomer","finished":"2026-09-01","id":"200700624","year":2026,"rating":4.0},{"title":"Mulliner Nights","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"18016","year":2026,"pages":240,"rating":5.0,"cover":"books/18016-cover.jpg","cr":0.648},{"title":"Perfection","author":"Vincenzo Latronico","last":"Latronico","finished":"2026-10-01","id":"203200544","year":2026,"pages":137,"rating":3.0,"cover":"books/203200544-cover.jpg","cr":0.652},{"title":"The Hitchhiker's Guide to the Galaxy","author":"Douglas Adams","last":"Adams","finished":"2026-10-01","id":"11","year":2026,"pages":216,"rating":4.0,"cover":"books/11-cover.jpg","cr":0.64,"spine":"books/11-spine.jpg","sr":0.14},{"title":"Uncle Dynamite","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241184","year":2026,"pages":288,"rating":4.0,"cover":"books/16241184-cover.jpg","cr":0.6},{"title":"Cocktail Time","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241186","year":2026,"pages":224,"rating":4.0,"cover":"books/16241186-cover.jpg","cr":0.596},{"title":"Mrs. Dalloway","author":"Virginia Woolf","last":"Woolf","finished":"2026-10-01","id":"14942","year":2026,"pages":194,"rating":3.25,"cover":"books/14942-cover.jpg","cr":0.672,"spine":"books/14942-spine.jpg","sr":0.13},{"title":"The Brief Wondrous Life of Oscar Wao","author":"Junot Díaz","last":"Díaz","finished":"2026-10-01","id":"297673","year":2026,"pages":335,"rating":3.75,"cover":"books/297673-cover.jpg","cr":0.686},{"title":"The Clicking of Cuthbert","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-11-01","id":"898737","year":2026,"pages":174,"rating":4.0,"cover":"books/898737-cover.jpg","cr":0.655}],"2025":[{"title":"The God of the Woods","author":"Liz Moore","last":"Moore","finished":"2025-01-01","id":"199698485","year":2025,"pages":562,"rating":4.0,"cover":"books/199698485-cover.jpg","cr":0.662},{"title":"Funny Story","author":"Emily Henry","last":"Henry","finished":"2025-01-01","id":"194802722","year":2025,"pages":395,"rating":3.0,"cover":"books/194802722-cover.jpg","cr":0.663},{"title":"Lonesome Dove","author":"Larry McMurtry","last":"McMurtry","finished":"2025-02-01","id":"256008","year":2025,"pages":960,"rating":5.0,"cover":"books/256008-cover.jpg","cr":0.642,"spine":"books/256008-spine.jpg","sr":0.25},{"title":"Harry Potter and the Prisoner of Azkaban","author":"J.K. Rowling","last":"Rowling","finished":"2025-03-01","id":"5","year":2025,"pages":547,"rating":4.0,"cover":"books/5-cover.jpg","cr":0.611},{"title":"Harry Potter and the Goblet of Fire","author":"J.K. Rowling","last":"Rowling","finished":"2025-04-01","id":"58613424","year":2025,"pages":752,"rating":4.0,"cover":"books/58613424-cover.jpg","cr":0.622},{"title":"Pedro Páramo","author":"Juan Rulfo","last":"Rulfo","finished":"2025-04-01","id":"38787","year":2025,"pages":128,"rating":3.0,"cover":"books/38787-cover.jpg","cr":0.632},{"title":"Time and Again","author":"Jack Finney","last":"Finney","finished":"2025-05-01","id":"40526","year":2025,"pages":400,"rating":4.0,"cover":"books/40526-cover.jpg","cr":0.648},{"title":"If on a Winter's Night a Traveler","author":"Italo Calvino","last":"Calvino","finished":"2025-05-01","id":"374233","year":2025,"pages":260,"rating":3.0,"cover":"books/374233-cover.jpg","cr":0.704},{"title":"Right Ho, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-05-01","id":"9850375","year":2025,"pages":257,"rating":5.0,"cover":"books/9850375-cover.jpg","cr":0.7},{"title":"Why Marriages Succeed or Fail","author":"John M. Gottman","last":"Gottman","finished":"2025-06-01","id":"56692","year":2025,"pages":240,"rating":4.0,"cover":"books/56692-cover.jpg","cr":0.653},{"title":"Thank You, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"16241200","year":2025,"pages":230,"rating":4.0,"cover":"books/16241200-cover.jpg","cr":0.598},{"title":"Stoner","author":"John Williams","last":"Williams","finished":"2025-06-01","id":"166997","year":2025,"pages":292,"rating":4.0,"cover":"books/166997-cover.jpg","cr":0.588},{"title":"The Code of the Woosters","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"9858081","year":2025,"pages":272,"rating":5.0,"spine":"books/woosters-spine.jpg","cover":"books/woosters-cover.jpg","sr":0.209,"cr":0.665},{"title":"Whose Body?","author":"Dorothy L. Sayers","last":"Sayers","finished":"2025-07-01","id":"192893","year":2025,"pages":224,"rating":3.0,"cover":"books/192893-cover.jpg","cr":0.606},{"title":"Girl, Woman, Other","author":"Bernardine Evaristo","last":"Evaristo","finished":"2025-07-01","id":"41081373","year":2025,"pages":453,"rating":4.0,"cover":"books/41081373-cover.jpg","cr":0.666},{"title":"A Gentleman in Moscow","author":"Amor Towles","last":"Towles","finished":"2025-07-01","id":"34066798","year":2025,"pages":495,"rating":4.0,"undated":true,"cover":"books/34066798-cover.jpg","cr":0.654},{"title":"Joy in the Morning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-07-01","id":"9928818","year":2025,"pages":272,"rating":4.0,"cover":"books/9928818-cover.jpg","cr":0.665},{"title":"The Mating Season","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-08-01","id":"16390","year":2025,"pages":272,"rating":4.0,"cover":"books/16390-cover.jpg","cr":0.632},{"title":"Angle of Repose","author":"Wallace Stegner","last":"Stegner","finished":"2025-09-01","id":"292408","year":2025,"pages":569,"rating":5.0,"cover":"books/292408-cover.jpg","cr":0.654},{"title":"Remarkably Bright Creatures","author":"Shelby Van Pelt","last":"Van Pelt","finished":"2025-09-01","id":"58733693","year":2025,"pages":360,"rating":4.0,"cover":"books/58733693-cover.jpg","cr":0.662},{"title":"The Sound and the Fury","author":"William Faulkner","last":"Faulkner","finished":"2025-09-01","id":"10975","year":2025,"pages":366,"rating":4.0,"cover":"books/10975-cover.jpg","cr":0.582},{"title":"Ring for Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-09-01","id":"18029","year":2025,"pages":240,"rating":3.0,"cover":"books/18029-cover.jpg","cr":0.688},{"title":"Minor Feelings","author":"Cathy Park Hong","last":"Hong","finished":"2025-09-30","id":"52845775","year":2025,"pages":209,"rating":3.0,"cover":"books/52845775-cover.jpg","cr":0.662},{"title":"Jesus’ Son","author":"Denis Johnson","last":"Johnson","finished":"2025-10-01","id":"608287","year":2025,"pages":160,"rating":4.0,"cover":"books/608287-cover.jpg","cr":0.606},{"title":"Rabbit, Run","author":"John Updike","last":"Updike","finished":"2025-10-01","id":"40656712","year":2025,"pages":337,"rating":4.0,"cover":"books/40656712-cover.jpg","cr":0.606},{"title":"Jeeves and the Feudal Spirit","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-10-01","id":"16375","year":2025,"pages":231,"rating":5.0,"cover":"books/16375-cover.jpg","cr":0.598},{"title":"Olive Kitteridge","author":"Elizabeth Strout","last":"Strout","finished":"2025-10-11","id":"1736739","year":2025,"pages":270,"rating":5.0,"cover":"books/1736739-cover.jpg","cr":0.658},{"title":"One Hundred Years of Solitude","author":"Gabriel García Márquez","last":"García Márquez","finished":"2025-10-11","id":"320","year":2025,"pages":417,"rating":3.0,"cover":"books/320-cover.jpg","cr":0.572},{"title":"The Stranger","author":"Albert Camus","last":"Camus","finished":"2025-11-01","id":"49552","year":2025,"pages":123,"rating":4.0,"cover":"books/49552-cover.jpg","cr":0.618},{"title":"The Remains of the Day","author":"Kazuo Ishiguro","last":"Ishiguro","finished":"2025-11-01","id":"28921","year":2025,"pages":258,"rating":4.0,"cover":"books/28921-cover.jpg","cr":0.623},{"title":"Interpreter of Maladies","author":"Jhumpa Lahiri","last":"Lahiri","finished":"2025-11-01","id":"5439","year":2025,"pages":198,"rating":5.0,"cover":"books/5439-cover.jpg","cr":0.63},{"title":"Rabbit Redux","author":"John Updike","last":"Updike","finished":"2025-11-01","id":"46917","year":2025,"pages":440,"rating":3.0,"cover":"books/46917-cover.jpg","cr":0.655},{"title":"Jeeves in the Offing","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-11-01","id":"16404","year":2025,"pages":200,"rating":4.0,"cover":"books/16404-cover.jpg","cr":0.674},{"title":"Harry Potter and the Order of the Phoenix","author":"J.K. Rowling","last":"Rowling","finished":"2025-11-01","id":"58613451","year":2025,"pages":896,"rating":4.0,"cover":"books/58613451-cover.jpg","cr":0.608},{"title":"Something Fresh","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"18025","year":2025,"pages":284,"rating":4.0,"cover":"books/18025-cover.jpg","cr":0.684},{"title":"Leave It to Psmith","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"13707720","year":2025,"pages":293,"rating":4.0,"cover":"books/13707720-cover.jpg","cr":0.668},{"title":"A Visit from the Goon Squad","author":"Jennifer Egan","last":"Egan","finished":"2025-12-01","id":"7331435","year":2025,"pages":274,"rating":5.0,"cover":"books/7331435-cover.jpg","cr":0.67},{"title":"Shooting Columbo","author":"David Koenig","last":"Koenig","finished":"2025-12-01","id":"58817174","year":2025,"pages":248,"rating":4.0,"cover":"books/58817174-cover.jpg","cr":0.684},{"title":"Empire Falls","author":"Richard Russo","last":"Russo","finished":"2025-12-01","id":"187020","year":2025,"pages":483,"rating":5.0,"cover":"books/187020-cover.jpg","cr":0.664},{"title":"Stiff Upper Lip, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"12550","year":2025,"pages":211,"rating":4.0,"cover":"books/12550-cover.jpg","cr":0.684}]};
+  const DATA = {"2026":[{"title":"The Age of Innocence","author":"Edith Wharton","last":"Wharton","finished":"2026-01-01","id":"22498786","year":2026,"pages":204,"rating":3.0,"spine":"books/aoi-spine.jpg","cover":"books/aoi-cover.jpg","sr":0.181,"cr":0.646},{"title":"Gilead","author":"Marilynne Robinson","last":"Robinson","finished":"2026-01-01","id":"127918224","year":2026,"rating":3.0,"spine":"books/gilead-spine.jpg","cover":"books/gilead-cover.jpg","sr":0.117,"cr":0.64},{"title":"Much Obliged, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-01-01","id":"16394","year":2026,"pages":208,"rating":4.0,"spine":"books/jtb-spine.jpg","cover":"books/jtb-cover.jpg","sr":0.076,"cr":0.677},{"title":"The Shipping News","author":"Annie Proulx","last":"Proulx","finished":"2026-01-27","id":"7354","year":2026,"pages":337,"rating":4.0,"spine":"books/ship-spine.jpg","cover":"books/ship-cover.jpg","sr":0.105,"cr":0.665},{"title":"Rabbit Is Rich","author":"John Updike","last":"Updike","finished":"2026-02-01","id":"85391","year":2026,"pages":480,"rating":5.0,"spine":"books/rir-spine.jpg","sr":0.205,"cover":"books/rir-cover.jpg","cr":0.66},{"title":"Demon Copperhead","author":"Barbara Kingsolver","last":"Kingsolver","finished":"2026-02-01","id":"60194162","year":2026,"pages":560,"rating":5.0,"cover":"books/demon-cover.jpg","cr":0.706,"spine":"books/dc-spine.jpg","sr":0.115},{"title":"Blandings Castle","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"13707660","year":2026,"pages":272,"rating":3.0,"spine":"books/bl-spine.jpg","sr":0.191,"cover":"books/bl-cover.jpg","cr":0.614},{"title":"Football","author":"Chuck Klosterman","last":"Klosterman","finished":"2026-02-01","id":"239522729","year":2026,"pages":304,"rating":3.0,"cover":"books/football-cover.jpg","cr":0.655,"spine":"books/football-spine.jpg","sr":0.115},{"title":"Aunts Aren't Gentlemen","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"720987","year":2026,"pages":167,"rating":4.0,"spine":"books/aunts-spine.jpg","sr":0.15,"cover":"books/aunts-cover.jpg","cr":0.63},{"title":"Ficciones","author":"Jorge Luis Borges","last":"Borges","finished":"2026-03-01","id":"426504","year":2026,"pages":174,"rating":3.0,"spine":"books/fic-spine.jpg","sr":0.14,"cover":"books/fic-cover.jpg","cr":0.64},{"title":"Summer Lightning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-03-01","id":"13707659","year":2026,"pages":288,"rating":3.0,"spine":"books/sl-spine.jpg","sr":0.18,"cover":"books/sl-cover.jpg","cr":0.62},{"title":"The Stone Diaries","author":"Carol Shields","last":"Shields","finished":"2026-03-01","id":"77554","year":2026,"pages":361,"rating":4.0,"spine":"books/st-spine.jpg","sr":0.18,"cover":"books/st-cover.jpg","cr":0.665},{"title":"Rabbit at Rest","author":"John Updike","last":"Updike","finished":"2026-03-01","id":"11666","year":2026,"pages":606,"rating":5.0,"spine":"books/rar-spine.jpg","cover":"books/rar-cover.jpg","sr":0.217,"cr":0.649},{"title":"Oranges","author":"John McPhee","last":"McPhee","finished":"2026-04-01","id":"54983","year":2026,"pages":160,"rating":4.0,"cover":"books/54983-cover.jpg","cr":0.655,"sr":0.138,"spine":"books/54983-spine-b.jpg"},{"title":"Heavy Weather","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707658","year":2026,"pages":288,"rating":4.0,"spine":"books/hw-spine.jpg","sr":0.119,"cover":"books/hw-cover.jpg","cr":0.66},{"title":"The Orphan Master's Son","author":"Adam Johnson","last":"Johnson","finished":"2026-04-01","id":"11529868","year":2026,"pages":443,"rating":4.0,"cover":"books/11529868-cover.jpg","cr":0.67,"sr":0.198,"spine":"books/11529868-spine-b.jpg"},{"title":"Uncle Fred in the Springtime","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707721","year":2026,"pages":242,"rating":4.0,"cover":"books/13707721-cover.jpg","cr":0.715,"spine":"books/13707721-spine-b.jpg","sr":0.15},{"title":"Main Street","author":"Sinclair Lewis","last":"Lewis","finished":"2026-05-01","id":"11376","year":2026,"pages":454,"rating":4.0,"cover":"books/11376-cover.jpg","cr":0.634,"sr":0.2,"spine":"books/11376-spine-b.jpg"},{"title":"The Sellout","author":"Paul Beatty","last":"Beatty","finished":"2026-05-01","id":"22237161","year":2026,"pages":289,"rating":4.0,"cover":"books/22237161-cover.jpg","cr":0.666,"sr":0.165,"spine":"books/22237161-spine-b.jpg"},{"title":"Meet Mr. Mulliner","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-05-01","id":"18053","year":2026,"pages":203,"rating":3.0,"cover":"books/18053-cover.jpg","cr":0.682,"sr":0.147,"spine":"books/18053-spine-b.jpg"},{"title":"The Netanyahus","author":"Joshua Cohen","last":"Cohen","finished":"2026-05-01","id":"55817233","year":2026,"pages":240,"rating":3.0,"cover":"books/55817233-cover.jpg","cr":0.675,"sr":0.155,"spine":"books/55817233-spine-b.jpg"},{"title":"Middlesex","author":"Jeffrey Eugenides","last":"Eugenides","finished":"2026-06-01","id":"2187","year":2026,"pages":529,"rating":5.0,"cover":"books/2187-cover.jpg","cr":0.648,"spine":"books/2187-spine-b.jpg","sr":0.22},{"title":"Less","author":"Andrew Sean Greer","last":"Greer","finished":"2026-06-01","id":"39927096","year":2026,"pages":273,"rating":3.0,"cover":"books/39927096-cover.jpg","cr":0.646,"sr":0.163,"spine":"books/39927096-spine-b.jpg"},{"title":"Full Moon","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-06-01","id":"16376","year":2026,"pages":272,"rating":3.0,"cover":"books/16376-cover.jpg","cr":0.66,"sr":0.162,"spine":"books/16376-spine-b.jpg"},{"title":"Redshirts","author":"John Scalzi","last":"Scalzi","finished":"2026-06-01","id":"13055592","year":2026,"pages":320,"rating":4.0,"cover":"books/13055592-cover.jpg","cr":0.662,"sr":0.172,"spine":"books/13055592-spine-b.jpg"},{"title":"The Overstory","author":"Richard Powers","last":"Powers","finished":"2026-07-01","id":"40180098","year":2026,"pages":502,"rating":4.0,"cover":"books/40180098-cover.jpg","cr":0.666,"spine":"books/40180098-spine-b.jpg","sr":0.21},{"title":"Mr. Mulliner Speaking","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-07-01","id":"18041","year":2026,"pages":232,"rating":4.0,"cover":"books/18041-cover.jpg","cr":0.68,"sr":0.154,"spine":"books/18041-spine-b.jpg"},{"title":"Cathedral","author":"Raymond Carver","last":"Carver","finished":"2026-07-01","id":"138758152","year":2026,"rating":4.0},{"title":"White Noise","author":"Don DeLillo","last":"DeLillo","finished":"2026-07-01","id":"28251250","year":2026,"pages":320,"rating":2.0,"cover":"books/28251250-cover.jpg","cr":0.66,"spine":"books/28251250-spine-b.jpg","sr":0.17},{"title":"Decline and Fall","author":"Evelyn Waugh","last":"Waugh","finished":"2026-08-01","id":"30929","year":2026,"pages":300,"rating":3.0,"cover":"books/30929-cover.jpg","cr":0.666,"sr":0.168,"spine":"books/30929-spine-b.jpg"},{"title":"In the Distance","author":"Hernan Diaz","last":"Diaz","finished":"2026-08-01","id":"34381330","year":2026,"pages":256,"rating":4.0,"cover":"books/34381330-cover.jpg","cr":0.666,"sr":0.159,"spine":"books/34381330-spine-b.jpg"},{"title":"Young Men in Spats","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-08-01","id":"16241167","year":2026,"pages":240,"rating":5.0,"cover":"books/16241167-cover.jpg","cr":0.67,"sr":0.155,"spine":"books/16241167-spine-b.jpg"},{"title":"The Sweetness at the Bottom of the Pie","author":"Alan Bradley","last":"Bradley","finished":"2026-08-01","id":"40605285","year":2026,"pages":386,"rating":3.0,"cover":"books/40605285-cover.jpg","cr":0.582,"sr":0.186,"spine":"books/40605285-spine-b.jpg"},{"title":"The Goldfinch","author":"Donna Tartt","last":"Tartt","finished":"2026-09-01","id":"17333223","year":2026,"pages":775,"rating":4.0,"cover":"books/17333223-cover.jpg","cr":0.647,"spine":"books/17333223-spine-b.jpg","sr":0.24},{"title":"Here Is New York","author":"E.B. White","last":"White","finished":"2026-09-01","id":"10814","year":2026,"pages":56,"rating":4.0,"cover":"books/10814-cover.jpg","cr":0.703,"sr":0.116,"spine":"books/10814-spine-b.jpg"},{"title":"Pigs Have Wings","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"60521","year":2026,"pages":240,"rating":4.0,"cover":"books/60521-cover.jpg","cr":0.604,"sr":0.155,"spine":"books/60521-spine-b.jpg"},{"title":"Dungeon Crawler Carl","author":"Matt Dinniman","last":"Dinniman","finished":"2026-09-01","id":"211721806","year":2026,"pages":450,"rating":3.0,"cover":"books/211721806-cover.jpg","cr":0.662,"sr":0.199,"spine":"books/211721806-spine-b.jpg"},{"title":"Sisters of a Halved Heart","author":"Nayantara Roy","last":"Roy","finished":"2026-09-01","id":"242445364","year":2026,"pages":352,"rating":3.0},{"title":"The Stalker","author":"Paula Bomer","last":"Bomer","finished":"2026-09-01","id":"200700624","year":2026,"rating":4.0},{"title":"Mulliner Nights","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"18016","year":2026,"pages":240,"rating":5.0,"cover":"books/18016-cover.jpg","cr":0.648,"sr":0.155,"spine":"books/18016-spine-b.jpg"},{"title":"Perfection","author":"Vincenzo Latronico","last":"Latronico","finished":"2026-10-01","id":"203200544","year":2026,"pages":137,"rating":3.0,"cover":"books/203200544-cover.jpg","cr":0.652,"sr":0.134,"spine":"books/203200544-spine-b.jpg"},{"title":"The Hitchhiker's Guide to the Galaxy","author":"Douglas Adams","last":"Adams","finished":"2026-10-01","id":"11","year":2026,"pages":216,"rating":4.0,"cover":"books/11-cover.jpg","cr":0.64,"spine":"books/11-spine-b.jpg","sr":0.14},{"title":"Uncle Dynamite","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241184","year":2026,"pages":288,"rating":4.0,"cover":"books/16241184-cover.jpg","cr":0.6,"sr":0.165,"spine":"books/16241184-spine-b.jpg"},{"title":"Cocktail Time","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241186","year":2026,"pages":224,"rating":4.0,"cover":"books/16241186-cover.jpg","cr":0.596,"sr":0.152,"spine":"books/16241186-spine-b.jpg"},{"title":"Mrs. Dalloway","author":"Virginia Woolf","last":"Woolf","finished":"2026-10-01","id":"14942","year":2026,"pages":194,"rating":3.25,"cover":"books/14942-cover.jpg","cr":0.672,"spine":"books/14942-spine-b.jpg","sr":0.13},{"title":"The Brief Wondrous Life of Oscar Wao","author":"Junot Díaz","last":"Díaz","finished":"2026-10-01","id":"297673","year":2026,"pages":335,"rating":3.75,"cover":"books/297673-cover.jpg","cr":0.686,"sr":0.175,"spine":"books/297673-spine-b.jpg"},{"title":"The Clicking of Cuthbert","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-11-01","id":"898737","year":2026,"pages":174,"rating":4.0,"cover":"books/898737-cover.jpg","cr":0.655,"sr":0.142,"spine":"books/898737-spine-b.jpg"}],"2025":[{"title":"The God of the Woods","author":"Liz Moore","last":"Moore","finished":"2025-01-01","id":"199698485","year":2025,"pages":562,"rating":4.0,"cover":"books/199698485-cover.jpg","cr":0.662,"sr":0.223,"spine":"books/199698485-spine-b.jpg"},{"title":"Funny Story","author":"Emily Henry","last":"Henry","finished":"2025-01-01","id":"194802722","year":2025,"pages":395,"rating":3.0,"cover":"books/194802722-cover.jpg","cr":0.663,"sr":0.188,"spine":"books/194802722-spine-b.jpg"},{"title":"Lonesome Dove","author":"Larry McMurtry","last":"McMurtry","finished":"2025-02-01","id":"256008","year":2025,"pages":960,"rating":5.0,"cover":"books/256008-cover.jpg","cr":0.642,"spine":"books/256008-spine-b.jpg","sr":0.25},{"title":"Harry Potter and the Prisoner of Azkaban","author":"J.K. Rowling","last":"Rowling","finished":"2025-03-01","id":"5","year":2025,"pages":547,"rating":4.0,"cover":"books/5-cover.jpg","cr":0.611,"sr":0.22,"spine":"books/5-spine-b.jpg"},{"title":"Harry Potter and the Goblet of Fire","author":"J.K. Rowling","last":"Rowling","finished":"2025-04-01","id":"58613424","year":2025,"pages":752,"rating":4.0,"cover":"books/58613424-cover.jpg","cr":0.622,"sr":0.25,"spine":"books/58613424-spine-b.jpg"},{"title":"Pedro Páramo","author":"Juan Rulfo","last":"Rulfo","finished":"2025-04-01","id":"38787","year":2025,"pages":128,"rating":3.0,"cover":"books/38787-cover.jpg","cr":0.632,"sr":0.132,"spine":"books/38787-spine-b.jpg"},{"title":"Time and Again","author":"Jack Finney","last":"Finney","finished":"2025-05-01","id":"40526","year":2025,"pages":400,"rating":4.0,"cover":"books/40526-cover.jpg","cr":0.648,"sr":0.189,"spine":"books/40526-spine-b.jpg"},{"title":"If on a Winter's Night a Traveler","author":"Italo Calvino","last":"Calvino","finished":"2025-05-01","id":"374233","year":2025,"pages":260,"rating":3.0,"cover":"books/374233-cover.jpg","cr":0.704,"sr":0.16,"spine":"books/374233-spine-b.jpg"},{"title":"Right Ho, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-05-01","id":"9850375","year":2025,"pages":257,"rating":5.0,"cover":"books/9850375-cover.jpg","cr":0.7,"sr":0.159,"spine":"books/9850375-spine-b.jpg"},{"title":"Why Marriages Succeed or Fail","author":"John M. Gottman","last":"Gottman","finished":"2025-06-01","id":"56692","year":2025,"pages":240,"rating":4.0,"cover":"books/56692-cover.jpg","cr":0.653,"sr":0.155,"spine":"books/56692-spine-b.jpg"},{"title":"Thank You, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"16241200","year":2025,"pages":230,"rating":4.0,"cover":"books/16241200-cover.jpg","cr":0.598,"sr":0.154,"spine":"books/16241200-spine-b.jpg"},{"title":"Stoner","author":"John Williams","last":"Williams","finished":"2025-06-01","id":"166997","year":2025,"pages":292,"rating":4.0,"cover":"books/166997-cover.jpg","cr":0.588,"sr":0.166,"spine":"books/166997-spine-b.jpg"},{"title":"The Code of the Woosters","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"9858081","year":2025,"pages":272,"rating":5.0,"spine":"books/woosters-spine.jpg","cover":"books/woosters-cover.jpg","sr":0.209,"cr":0.665},{"title":"Whose Body?","author":"Dorothy L. Sayers","last":"Sayers","finished":"2025-07-01","id":"192893","year":2025,"pages":224,"rating":3.0,"cover":"books/192893-cover.jpg","cr":0.606,"sr":0.152,"spine":"books/192893-spine-b.jpg"},{"title":"Girl, Woman, Other","author":"Bernardine Evaristo","last":"Evaristo","finished":"2025-07-01","id":"41081373","year":2025,"pages":453,"rating":4.0,"cover":"books/41081373-cover.jpg","cr":0.666,"sr":0.2,"spine":"books/41081373-spine-b.jpg"},{"title":"A Gentleman in Moscow","author":"Amor Towles","last":"Towles","finished":"2025-07-01","id":"34066798","year":2025,"pages":495,"rating":4.0,"undated":true,"cover":"books/34066798-cover.jpg","cr":0.654,"sr":0.209,"spine":"books/34066798-spine-b.jpg"},{"title":"Joy in the Morning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-07-01","id":"9928818","year":2025,"pages":272,"rating":4.0,"cover":"books/9928818-cover.jpg","cr":0.665,"sr":0.162,"spine":"books/9928818-spine-b.jpg"},{"title":"The Mating Season","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-08-01","id":"16390","year":2025,"pages":272,"rating":4.0,"cover":"books/16390-cover.jpg","cr":0.632,"sr":0.162,"spine":"books/16390-spine-b.jpg"},{"title":"Angle of Repose","author":"Wallace Stegner","last":"Stegner","finished":"2025-09-01","id":"292408","year":2025,"pages":569,"rating":5.0,"cover":"books/292408-cover.jpg","cr":0.654,"sr":0.225,"spine":"books/292408-spine-b.jpg"},{"title":"Remarkably Bright Creatures","author":"Shelby Van Pelt","last":"Van Pelt","finished":"2025-09-01","id":"58733693","year":2025,"pages":360,"rating":4.0,"cover":"books/58733693-cover.jpg","cr":0.662,"sr":0.181,"spine":"books/58733693-spine-b.jpg"},{"title":"The Sound and the Fury","author":"William Faulkner","last":"Faulkner","finished":"2025-09-01","id":"10975","year":2025,"pages":366,"rating":4.0,"cover":"books/10975-cover.jpg","cr":0.582,"sr":0.182,"spine":"books/10975-spine-b.jpg"},{"title":"Ring for Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-09-01","id":"18029","year":2025,"pages":240,"rating":3.0,"cover":"books/18029-cover.jpg","cr":0.688,"sr":0.155,"spine":"books/18029-spine-b.jpg"},{"title":"Minor Feelings","author":"Cathy Park Hong","last":"Hong","finished":"2025-09-30","id":"52845775","year":2025,"pages":209,"rating":3.0,"cover":"books/52845775-cover.jpg","cr":0.662,"sr":0.149,"spine":"books/52845775-spine-b.jpg"},{"title":"Jesus’ Son","author":"Denis Johnson","last":"Johnson","finished":"2025-10-01","id":"608287","year":2025,"pages":160,"rating":4.0,"cover":"books/608287-cover.jpg","cr":0.606,"sr":0.138,"spine":"books/608287-spine-b.jpg"},{"title":"Rabbit, Run","author":"John Updike","last":"Updike","finished":"2025-10-01","id":"40656712","year":2025,"pages":337,"rating":4.0,"cover":"books/40656712-cover.jpg","cr":0.606,"sr":0.175,"spine":"books/40656712-spine-b.jpg"},{"title":"Jeeves and the Feudal Spirit","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-10-01","id":"16375","year":2025,"pages":231,"rating":5.0,"cover":"books/16375-cover.jpg","cr":0.598,"sr":0.154,"spine":"books/16375-spine-b.jpg"},{"title":"Olive Kitteridge","author":"Elizabeth Strout","last":"Strout","finished":"2025-10-11","id":"1736739","year":2025,"pages":270,"rating":5.0,"cover":"books/1736739-cover.jpg","cr":0.658,"sr":0.162,"spine":"books/1736739-spine-b.jpg"},{"title":"One Hundred Years of Solitude","author":"Gabriel García Márquez","last":"García Márquez","finished":"2025-10-11","id":"320","year":2025,"pages":417,"rating":3.0,"cover":"books/320-cover.jpg","cr":0.572,"sr":0.193,"spine":"books/320-spine-b.jpg"},{"title":"The Stranger","author":"Albert Camus","last":"Camus","finished":"2025-11-01","id":"49552","year":2025,"pages":123,"rating":4.0,"cover":"books/49552-cover.jpg","cr":0.618,"sr":0.131,"spine":"books/49552-spine-b.jpg"},{"title":"The Remains of the Day","author":"Kazuo Ishiguro","last":"Ishiguro","finished":"2025-11-01","id":"28921","year":2025,"pages":258,"rating":4.0,"cover":"books/28921-cover.jpg","cr":0.623,"sr":0.159,"spine":"books/28921-spine-b.jpg"},{"title":"Interpreter of Maladies","author":"Jhumpa Lahiri","last":"Lahiri","finished":"2025-11-01","id":"5439","year":2025,"pages":198,"rating":5.0,"cover":"books/5439-cover.jpg","cr":0.63,"sr":0.146,"spine":"books/5439-spine-b.jpg"},{"title":"Rabbit Redux","author":"John Updike","last":"Updike","finished":"2025-11-01","id":"46917","year":2025,"pages":440,"rating":3.0,"cover":"books/46917-cover.jpg","cr":0.655,"sr":0.197,"spine":"books/46917-spine-b.jpg"},{"title":"Jeeves in the Offing","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-11-01","id":"16404","year":2025,"pages":200,"rating":4.0,"cover":"books/16404-cover.jpg","cr":0.674,"sr":0.147,"spine":"books/16404-spine-b.jpg"},{"title":"Harry Potter and the Order of the Phoenix","author":"J.K. Rowling","last":"Rowling","finished":"2025-11-01","id":"58613451","year":2025,"pages":896,"rating":4.0,"cover":"books/58613451-cover.jpg","cr":0.608,"sr":0.25,"spine":"books/58613451-spine-b.jpg"},{"title":"Something Fresh","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"18025","year":2025,"pages":284,"rating":4.0,"cover":"books/18025-cover.jpg","cr":0.684,"sr":0.165,"spine":"books/18025-spine-b.jpg"},{"title":"Leave It to Psmith","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"13707720","year":2025,"pages":293,"rating":4.0,"cover":"books/13707720-cover.jpg","cr":0.668,"sr":0.166,"spine":"books/13707720-spine-b.jpg"},{"title":"A Visit from the Goon Squad","author":"Jennifer Egan","last":"Egan","finished":"2025-12-01","id":"7331435","year":2025,"pages":274,"rating":5.0,"cover":"books/7331435-cover.jpg","cr":0.67,"sr":0.163,"spine":"books/7331435-spine-b.jpg"},{"title":"Shooting Columbo","author":"David Koenig","last":"Koenig","finished":"2025-12-01","id":"58817174","year":2025,"pages":248,"rating":4.0,"cover":"books/58817174-cover.jpg","cr":0.684,"sr":0.157,"spine":"books/58817174-spine-b.jpg"},{"title":"Empire Falls","author":"Richard Russo","last":"Russo","finished":"2025-12-01","id":"187020","year":2025,"pages":483,"rating":5.0,"cover":"books/187020-cover.jpg","cr":0.664,"sr":0.206,"spine":"books/187020-spine-b.jpg"},{"title":"Stiff Upper Lip, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"12550","year":2025,"pages":211,"rating":4.0,"cover":"books/12550-cover.jpg","cr":0.684,"sr":0.149,"spine":"books/12550-spine-b.jpg"}]};
 
   // Spine colours: [background, text, accent, text on accent]
   const PAL = [
@@ -555,6 +592,7 @@ h1 em { font-weight: 500; }
     $("#cAuthor").textContent = b.author;
     $("#cLink").href = b.href;
     card.hidden = false;
+    if (EDIT) editOnOpen(i);
   }
 
   function closeBook() {
@@ -590,7 +628,7 @@ h1 em { font-weight: 500; }
     if (next) { e.preventDefault(); next.focus(); }
   });
   document.addEventListener("click", (e) => {
-    if (openIdx >= 0 && !e.target.closest(".slot") && !e.target.closest("#card")) closeBook();
+    if (openIdx >= 0 && !e.target.closest(".slot") && !e.target.closest("#card") && !e.target.closest("#editbar")) closeBook();
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && openIdx >= 0) {
@@ -600,6 +638,243 @@ h1 em { font-weight: 500; }
     }
   });
   $("#cBack").addEventListener("click", closeBook);
+
+  /* ------------------------------------------------------------------
+     EDIT MODE: open the page with ?edit to change a book's cover.
+     The new image and the updated DATA line are committed to main in one
+     commit through the GitHub API, using a token kept only in this browser.
+     ------------------------------------------------------------------ */
+  const EDIT = new URLSearchParams(location.search).has("edit");
+  const GH_REPO = "niddy1/readings", GH_BRANCH = "main";
+  const TOKEN_KEY = "readings.githubToken";
+  const COVER_MAX_H = 900, COVER_QUALITY = 0.86;
+  let pending = null; // { i, old: {cover, cr}, url, cr, b64 }
+
+  function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; } }
+  function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) { /* storage off */ } }
+
+  function status(el, msg, err) { el.textContent = msg; el.classList.toggle("err", !!err); }
+
+  async function gh(path, method, body) {
+    const res = await fetch("https://api.github.com/repos/" + GH_REPO + path, {
+      method: method || "GET",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json"
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store"
+    });
+    if (!res.ok) {
+      const e = new Error("GitHub said " + res.status);
+      e.status = res.status;
+      throw e;
+    }
+    return res.json();
+  }
+
+  function ghMessage(e) {
+    if (e.status === 401) return "GitHub didn't accept the token. Check it was copied in full, or make a new one.";
+    if (e.status === 403 || e.status === 404) return "This token can't write to " + GH_REPO + ". Give it Contents: Read and write on that repository.";
+    if (e.status === 409 || e.status === 422) return "Someone else changed the repo at the same moment. Try saving again.";
+    if (e instanceof TypeError) return "Couldn't reach GitHub. Check your connection and try again.";
+    return e.message || "Something went wrong.";
+  }
+
+  function b64ToText(b64) {
+    const bin = atob(b64.replace(/\s/g, ""));
+    const bytes = new Uint8Array(bin.length);
+    for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable")); };
+      img.src = url;
+    });
+  }
+
+  async function prepareCover(file) {
+    const img = await loadImage(file);
+    const k = Math.min(1, COVER_MAX_H / img.naturalHeight);
+    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d");
+    ctx.fillStyle = "#fff"; // flatten transparent PNGs onto white
+    ctx.fillRect(0, 0, w, h);
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, w, h);
+    const url = cv.toDataURL("image/jpeg", COVER_QUALITY);
+    return { url: url, b64: url.slice(url.indexOf(",") + 1), cr: Math.round((w / h) * 1000) / 1000 };
+  }
+
+  // Swap a book's cover on the shelf without saving anything.
+  function showCover(i, cover, cr) {
+    books[i].cover = cover;
+    books[i].cr = cr;
+    layout();
+    openBook(i);
+  }
+
+  async function commitCover(b, b64, cr) {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const ref = await gh("/git/ref/heads/" + GH_BRANCH);
+        const head = ref.object.sha;
+        const commit = await gh("/git/commits/" + head);
+        const file = await gh("/contents/index.html?ref=" + head);
+        const html = b64ToText(file.content);
+        const m = html.match(/const DATA = (\{.*?\});\s*$/m);
+        if (!m) throw new Error("Couldn't find the book list in index.html.");
+        const data = JSON.parse(m[1]);
+        const path = "books/" + b.id + "-cover.jpg";
+        let hit = null;
+        Object.keys(data).forEach((y) => data[y].forEach((x) => { if (x.id === b.id) hit = x; }));
+        if (!hit) throw new Error("That book isn't in index.html on GitHub any more.");
+        hit.cover = path + "?v=" + Date.now().toString(36); // new URL so browsers don't show the old picture
+        hit.cr = cr;
+        const newHtml = html.slice(0, m.index) + "const DATA = " + JSON.stringify(data) + ";" + html.slice(m.index + m[0].replace(/\s*$/, "").length);
+        const imgBlob = await gh("/git/blobs", "POST", { content: b64, encoding: "base64" });
+        const htmlBlob = await gh("/git/blobs", "POST", { content: newHtml, encoding: "utf-8" });
+        const tree = await gh("/git/trees", "POST", {
+          base_tree: commit.tree.sha,
+          tree: [
+            { path: path, mode: "100644", type: "blob", sha: imgBlob.sha },
+            { path: "index.html", mode: "100644", type: "blob", sha: htmlBlob.sha }
+          ]
+        });
+        const made = await gh("/git/commits", "POST", { message: "Change cover: " + b.title, tree: tree.sha, parents: [head] });
+        await gh("/git/refs/heads/" + GH_BRANCH, "PATCH", { sha: made.sha });
+        return { sha: made.sha, cover: hit.cover };
+      } catch (e) {
+        if (attempt === 0 && (e.status === 409 || e.status === 422)) continue; // branch moved under us: rebuild once on the new head
+        throw e;
+      }
+    }
+  }
+
+  function editButtons() {
+    const busy = pending && pending.saving;
+    $("#eChange").hidden = !!pending;
+    $("#eSave").hidden = !pending;
+    $("#eCancel").hidden = !pending;
+    $("#eSave").disabled = $("#eCancel").disabled = !!busy;
+  }
+
+  function cancelPending() {
+    if (!pending) return;
+    const p = pending;
+    pending = null;
+    showCover(p.i, p.old.cover, p.old.cr);
+  }
+
+  function editOnOpen(i) {
+    if (pending && pending.i !== i && !pending.saving) {
+      const p = pending; pending = null;
+      books[p.i].cover = p.old.cover; books[p.i].cr = p.old.cr;
+      layout(); openBook(i); // re-enters editOnOpen with nothing pending
+      return;
+    }
+    $("#cEdit").hidden = false;
+    editButtons();
+    if (!pending) status($("#eStatus"), getToken() ? "" : "Connect GitHub (top right) to save a new cover.");
+  }
+
+  function renderEditbar() {
+    const on = !!getToken();
+    $("#ebOn").hidden = !on;
+    $("#ebForm").hidden = on;
+  }
+
+  if (EDIT) {
+    $("#editbar").hidden = false;
+    $(".hint").textContent = "Edit mode: take a book off the shelf, then choose Change cover.";
+    renderEditbar();
+
+    $("#ebForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const t = $("#ebToken").value.trim();
+      if (!t) return;
+      setToken(t);
+      $("#ebToken").value = "";
+      status($("#ebStatus"), "Checking the token…");
+      try {
+        const repo = await gh("");
+        if (!repo.permissions || !repo.permissions.push) {
+          const err = new Error(); err.status = 403; throw err;
+        }
+        status($("#ebStatus"), "");
+        renderEditbar();
+        if (openIdx >= 0) editOnOpen(openIdx);
+      } catch (err) {
+        setToken("");
+        renderEditbar();
+        status($("#ebStatus"), ghMessage(err), true);
+      }
+    });
+    $("#ebForget").addEventListener("click", () => {
+      setToken("");
+      renderEditbar();
+      status($("#ebStatus"), "Disconnected. The token is no longer stored in this browser.");
+    });
+
+    $("#eChange").addEventListener("click", () => {
+      if (!getToken()) { status($("#eStatus"), "Connect GitHub (top right) first.", true); return; }
+      $("#eFile").value = "";
+      $("#eFile").click();
+    });
+    $("#eFile").addEventListener("change", async () => {
+      const file = $("#eFile").files[0];
+      if (!file || openIdx < 0) return;
+      const i = openIdx, b = books[i];
+      status($("#eStatus"), "Reading the image…");
+      try {
+        const c = await prepareCover(file);
+        pending = { i: i, old: { cover: b.cover, cr: b.cr }, url: c.url, cr: c.cr, b64: c.b64 };
+        showCover(i, c.url, c.cr);
+        status($("#eStatus"), "This is a preview. Save to put it on the live site.");
+      } catch (e) {
+        status($("#eStatus"), "Couldn't read that image. Use a JPEG, PNG or WebP.", true);
+      }
+    });
+    $("#eCancel").addEventListener("click", () => {
+      cancelPending();
+      status($("#eStatus"), "");
+    });
+    $("#eSave").addEventListener("click", async () => {
+      if (!pending || pending.saving) return;
+      const p = pending, b = books[p.i];
+      p.saving = true;
+      editButtons();
+      status($("#eStatus"), "Saving to GitHub…");
+      try {
+        const r = await commitCover(b, p.b64, p.cr);
+        pending = null;
+        if (openIdx === p.i) {
+          editButtons();
+          const st = $("#eStatus");
+          st.classList.remove("err");
+          st.textContent = "Saved. The live site updates in about a minute. ";
+          const a = document.createElement("a");
+          a.href = "https://github.com/" + GH_REPO + "/commit/" + r.sha;
+          a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = "See the commit";
+          st.appendChild(a);
+        }
+      } catch (e) {
+        p.saving = false;
+        editButtons();
+        status($("#eStatus"), "Not saved. " + ghMessage(e), true);
+      }
+    });
+  }
 
   layout();
   if (typeof ResizeObserver !== "undefined") {
