@@ -1,0 +1,367 @@
+[
+ {
+  "id": "13707721",
+  "sr": 0.15,
+  "bg": "#f5f2dc",
+  "tex": 0.7,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "P.G.\nWODEHOUSE",
+    "f": "cinzel",
+    "wt": 600,
+    "c": "#5d5c4c",
+    "sz": 0.13,
+    "w": 0.78
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "UNCLE FRED\nIN THE SPRINGTIME",
+   "f": "cinzel",
+   "wt": 600,
+   "c": "#2f2f27",
+   "w": 0.66,
+   "lead": 1.15
+  },
+  "bot": [
+   {
+    "t": "rule",
+    "c": "#8a8565",
+    "h": 0.003,
+    "inset": 0.15
+   },
+   {
+    "t": "crop",
+    "box": [
+     0.25,
+     0.42,
+     0.95,
+     0.95
+    ],
+    "h": 0.3,
+    "bleed": true
+   }
+  ]
+ },
+ {
+  "id": "2187",
+  "sr": 0.22,
+  "bg": "#0c0d0b",
+  "tex": 0.5,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "JEFFREY\nEUGENIDES",
+    "f": "oswald",
+    "wt": 300,
+    "c": "#d9d7cf",
+    "sz": 0.11,
+    "tr": 0.12,
+    "w": 0.74
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "MIDDLESEX",
+   "f": "oswald",
+   "wt": 300,
+   "c": "#f1efe8",
+   "tr": 0.18,
+   "w": 0.48
+  },
+  "bot": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "PICADOR",
+    "f": "oswald",
+    "wt": 400,
+    "c": "#a9a79f",
+    "sz": 0.075,
+    "tr": 0.25
+   }
+  ],
+  "pad": 0.06
+ },
+ {
+  "id": "17333223",
+  "sr": 0.24,
+  "bg": "#ece7d9",
+  "tex": 0.45,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "Donna\nTartt",
+    "f": "caveat",
+    "wt": 600,
+    "c": "#2d2925",
+    "sz": 0.2,
+    "w": 0.7,
+    "lead": 0.95
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "The Goldfinch",
+   "f": "caveat",
+   "wt": 600,
+   "c": "#221f1c",
+   "w": 0.62
+  },
+  "bot": [
+   {
+    "t": "rule",
+    "c": "#b08a3a",
+    "h": 0.004,
+    "inset": 0.3
+   },
+   {
+    "t": "text",
+    "o": "h",
+    "s": "a novel",
+    "f": "caveat",
+    "wt": 500,
+    "c": "#4a4540",
+    "sz": 0.13
+   }
+  ]
+ },
+ {
+  "id": "11",
+  "sr": 0.14,
+  "bg": {
+   "crop": [
+    0.0,
+    0.35,
+    0.16,
+    0.95
+   ],
+   "blur": 1.5,
+   "tint": "#0d3a48",
+   "ta": 0.35
+  },
+  "tex": 0.5,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "ADAMS",
+    "f": "poppinsb",
+    "c": "#ffffff",
+    "sz": 0.17,
+    "tr": 0.08,
+    "w": 0.8
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "The Hitchhiker's Guide to the Galaxy",
+   "f": "poppinsbi",
+   "c": "#ffb35c",
+   "w": 0.6
+  },
+  "bot": [
+   {
+    "t": "crop",
+    "box": [
+     0.55,
+     0.33,
+     0.95,
+     0.6
+    ],
+    "h": 0.13,
+    "bleed": true
+   }
+  ]
+ },
+ {
+  "id": "40180098",
+  "sr": 0.21,
+  "bg": {
+   "crop": [
+    0.02,
+    0.22,
+    0.22,
+    0.84
+   ],
+   "blur": 0.8,
+   "tint": "#1d0f05",
+   "ta": 0.35
+  },
+  "tex": 0.5,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "RICHARD\nPOWERS",
+    "f": "josefin",
+    "wt": 400,
+    "c": "#f4eee0",
+    "sz": 0.12,
+    "tr": 0.12,
+    "w": 0.76
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "The Overstory",
+   "f": "josefin",
+   "wt": 400,
+   "c": "#fbf6ea",
+   "tr": 0.06,
+   "w": 0.5
+  },
+  "bot": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "A NOVEL",
+    "f": "fell",
+    "c": "#e8dcc2",
+    "sz": 0.1,
+    "tr": 0.15
+   }
+  ]
+ },
+ {
+  "id": "28251250",
+  "sr": 0.17,
+  "bg": "#f3f0e8",
+  "tex": 0.4,
+  "top": [
+   {
+    "t": "band",
+    "c": "#f04e12",
+    "h": 0.15,
+    "els": [
+     {
+      "t": "text",
+      "o": "h",
+      "s": "DON\nDeLILLO",
+      "f": "karla",
+      "wt": 700,
+      "c": "#ffffff",
+      "sz": 0.15,
+      "tr": 0.06,
+      "w": 0.74
+     }
+    ],
+    "bleed": true
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "White Noise",
+   "f": "poppins",
+   "c": "#1f1f1f",
+   "w": 0.5
+  },
+  "bot": [
+   {
+    "t": "band",
+    "c": "#f04e12",
+    "h": 0.13,
+    "els": [
+     {
+      "t": "text",
+      "o": "h",
+      "s": "PENGUIN",
+      "f": "karla",
+      "wt": 700,
+      "c": "#ffffff",
+      "sz": 0.12,
+      "tr": 0.12,
+      "w": 0.72
+     }
+    ],
+    "bleed": true
+   }
+  ]
+ },
+ {
+  "id": "256008",
+  "sr": 0.25,
+  "bg": "#e8d39a",
+  "tex": 0.8,
+  "top": [
+   {
+    "t": "band",
+    "c": "#3d3b80",
+    "h": 0.17,
+    "els": [
+     {
+      "t": "text",
+      "o": "h",
+      "s": "LARRY\nMcMURTRY",
+      "f": "rye",
+      "c": "#efe2b4",
+      "sz": 0.12,
+      "w": 0.8,
+      "lead": 1.15
+     }
+    ],
+    "bleed": true
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "LONESOME DOVE",
+   "f": "rye",
+   "c": "#2b2416",
+   "w": 0.58
+  },
+  "bot": [
+   {
+    "t": "crop",
+    "box": [
+     0.3,
+     0.47,
+     0.98,
+     0.6
+    ],
+    "h": 0.15,
+    "bleed": true
+   }
+  ]
+ },
+ {
+  "id": "14942",
+  "sr": 0.13,
+  "bg": "#e9b620",
+  "tex": 0.5,
+  "top": [
+   {
+    "t": "text",
+    "o": "h",
+    "s": "WOOLF",
+    "f": "limelight",
+    "c": "#141414",
+    "sz": 0.2,
+    "w": 0.8
+   }
+  ],
+  "mid": {
+   "t": "text",
+   "s": "Mrs. Dalloway",
+   "f": "dmserif",
+   "c": "#141414",
+   "w": 0.62
+  },
+  "bot": [
+   {
+    "t": "rule",
+    "c": "#141414",
+    "h": 0.004,
+    "inset": 0.25
+   },
+   {
+    "t": "gap",
+    "h": 0.02
+   }
+  ]
+ }
+]
