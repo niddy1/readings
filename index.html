@@ -1,0 +1,613 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Read in 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Karla:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Oswald:wght@500;600&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a wooden bookcase against a wall. Shelves are packed by script, oldest finished book top-left.
+   Each book is a 3D box: spine faces the viewer, the front cover sits on its right edge and swings round when the book is picked up. */
+:root {
+  --wall: #c7d0d4;
+  --glow: rgba(255, 255, 255, 0.45);
+  --ink: #1d2a2e;
+  --muted: #465659;
+  --wood-hi: #a7764a;
+  --wood-mid: #85582f;
+  --wood-lo: #5f3e20;
+  --back: #6f4c2f;
+  --back-deep: #4a301b;
+  --room: #ead9b8;
+  --tag-bg: #e7d8b4;
+  --tag-ink: #3a2a12;
+  --card: #f6f3ec;
+  --rule: rgba(0, 0, 0, 0.18);
+  --accent: #7a4a12;
+  --on-accent: #fff6e4;
+  --focus: #ffd98a;
+  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --font-ui: "Karla", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wall: #0f1a1e;
+    --glow: rgba(255, 184, 100, 0.13);
+    --ink: #e8e3d8;
+    --muted: #9fabab;
+    --wood-hi: #6a4529;
+    --wood-mid: #4c301a;
+    --wood-lo: #301d0f;
+    --back: #231710;
+    --back-deep: #120b07;
+    --room: #b3a080;
+    --card: #1b2226;
+    --rule: rgba(255, 255, 255, 0.16);
+    --accent: #e2ae55;
+    --on-accent: #1c1305;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --wall: #0f1a1e;
+  --glow: rgba(255, 184, 100, 0.13);
+  --ink: #e8e3d8;
+  --muted: #9fabab;
+  --wood-hi: #6a4529;
+  --wood-mid: #4c301a;
+  --wood-lo: #301d0f;
+  --back: #231710;
+  --back-deep: #120b07;
+  --room: #b3a080;
+  --card: #1b2226;
+  --rule: rgba(255, 255, 255, 0.16);
+  --accent: #e2ae55;
+  --on-accent: #1c1305;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(900px 520px at 88% -8%, var(--glow), transparent 62%), var(--wall);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.45;
+  padding-block: 28px 150px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: clip;
+}
+.wrap { max-width: 800px; margin-inline: auto; }
+
+/* Header */
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 24px; }
+.eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.sample { margin-left: 10px; padding: 2px 8px; border: 1px dashed var(--muted); border-radius: 3px; letter-spacing: 0.12em; }
+h1 { margin: 4px 0 0; font: 700 clamp(44px, 9vw, 80px) / 0.95 var(--font-display); letter-spacing: -0.01em; text-wrap: balance; }
+h1 em { font-weight: 500; }
+.stats { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { font-size: 20px; letter-spacing: 0; color: var(--ink); font-family: var(--font-display); }
+.year + .year { margin-top: 84px; }
+.yearhead { margin-bottom: 22px; }
+.yearhead h2 { margin: 0; font: 700 clamp(34px, 6.5vw, 56px) / 1 var(--font-display); letter-spacing: -0.01em; }
+.yearhead h2 em { font-weight: 500; }
+.hint { margin: 14px 0 26px; max-width: 58ch; color: var(--muted); }
+
+/* Bookcase */
+.case {
+  padding: 18px 18px 0;
+  border-radius: 6px 6px 0 0;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.28), transparent 5%, transparent 95%, rgba(0,0,0,.28)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 1px, transparent 1px 7px, rgba(255,255,255,.05) 7px 8px, transparent 8px 17px),
+    var(--wood-mid);
+  box-shadow: 0 34px 44px -22px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,255,255,.18);
+}
+.case::before {
+  content: ""; display: block; height: 12px; margin: -18px -4px 10px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(var(--wood-hi), var(--wood-mid));
+  box-shadow: 0 5px 8px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.inside {
+  background: linear-gradient(var(--back), var(--back-deep) 160%);
+  box-shadow: inset 0 12px 20px -6px rgba(0,0,0,.65), inset 9px 0 14px -8px rgba(0,0,0,.55), inset -9px 0 14px -8px rgba(0,0,0,.55);
+}
+.plinth {
+  height: 30px; margin: 0 -18px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 1px, transparent 1px 5px),
+    linear-gradient(var(--wood-mid), var(--wood-lo));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 8px 12px -4px rgba(0,0,0,.4);
+}
+
+.row { position: relative; z-index: 0; padding-top: 30px; }
+.row.has-open { z-index: 10; }
+.row::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 50px; background: linear-gradient(rgba(0,0,0,.42), transparent); pointer-events: none; }
+.books { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 3px; padding: 0 14px; margin-bottom: 5px; }
+.board {
+  position: relative; z-index: 1; height: 24px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 1px, transparent 1px 4px, rgba(255,255,255,.05) 4px 5px, transparent 5px 9px),
+    linear-gradient(var(--wood-hi), var(--wood-mid) 55%, var(--wood-lo));
+  box-shadow: 0 14px 16px -8px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.28);
+}
+.board::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 15px;
+  background: linear-gradient(var(--wood-mid), var(--wood-hi));
+  clip-path: polygon(1.5% 0, 98.5% 0, 100% 100%, 0 100%);
+}
+.tag {
+  position: absolute; left: 18px; top: 5px; height: 14px; padding: 0 8px;
+  background: var(--tag-bg); color: var(--tag-ink);
+  font: 700 9px / 14px var(--font-ui); letter-spacing: 0.14em; text-transform: uppercase;
+  border-radius: 1px; box-shadow: 0 1px 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.12);
+}
+.room-note {
+  margin-left: auto; align-self: center; text-align: right;
+  font: italic 500 15px / 1.3 var(--font-display); color: var(--room);
+}
+
+/* Books */
+.slot { position: relative; flex: none; width: var(--t); height: var(--h); perspective: 900px; }
+.slot::after {
+  content: ""; position: absolute; left: -3px; right: -3px; bottom: -5px; height: 9px;
+  background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent);
+  pointer-events: none; transition: opacity .3s;
+}
+.slot.open { z-index: 30; }
+.slot.open::after { opacity: 0; }
+.lift { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.8,.25,1); }
+.book { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3,.85,.3,1); }
+.face { position: absolute; left: calc(var(--t) / -2); top: calc(var(--h) / -2); margin: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+.spine {
+  width: var(--t); height: var(--h);
+  transform: translateZ(calc(var(--w) / 2));
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px;
+  padding: 24px 0 12px; overflow: hidden;
+  background: var(--bg); color: var(--fg);
+  border: 0; font: inherit; cursor: pointer; user-select: none; touch-action: manipulation;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.2);
+  border-radius: 1px 1px 0 0;
+}
+.spine::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 7px;
+  background: linear-gradient(var(--ac) 0 2px, transparent 2px 5px, var(--ac) 5px 7px);
+}
+.spine::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(0,0,0,.32), rgba(255,255,255,.13) 22%, rgba(255,255,255,0) 46%, rgba(0,0,0,.24));
+}
+.spine:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; z-index: 5; }
+.s-title {
+  writing-mode: vertical-rl; margin-bottom: auto; overflow: hidden;
+  font-family: var(--ff); font-weight: var(--fw); font-style: var(--fst);
+  text-transform: var(--tt); letter-spacing: var(--ls);
+  line-height: 1.14; text-align: start; color: var(--fg);
+}
+.s-author {
+  writing-mode: vertical-rl; white-space: nowrap;
+  font-family: var(--font-ui); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  line-height: 1; opacity: .88;
+}
+.mark { flex: none; width: 7px; height: 7px; border: 1.5px solid var(--ac); transform: rotate(45deg); margin-top: 3px; }
+
+.cover {
+  position: absolute; left: calc(var(--w) / -2); top: calc(var(--h) / -2);
+  width: var(--w); height: var(--h);
+  transform: rotateY(90deg) translateZ(calc(var(--t) / 2));
+  display: block; overflow: hidden; text-decoration: none;
+  background: var(--bg); color: var(--fg);
+  border-radius: 2px 5px 5px 2px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.22);
+  pointer-events: none; cursor: pointer;
+}
+.slot.open .cover { pointer-events: auto; box-shadow: inset 0 0 0 1px rgba(0,0,0,.22), 0 22px 34px -8px rgba(0,0,0,.55); }
+.cover::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(0,0,0,0) 2.2%, rgba(255,255,255,.18) 3.6%, rgba(0,0,0,.10) 5.4%, rgba(0,0,0,0) 8%),
+    linear-gradient(135deg, rgba(255,255,255,.12), transparent 42%);
+}
+.spine.photo { padding: 0; border-radius: 0; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
+.spine.photo::before { display: none; }
+.spine.photo::after { background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(255,255,255,.07) 24%, rgba(255,255,255,0) 50%, rgba(0,0,0,.22)); }
+.cover.photo { background-size: 100% 100%; background-position: center; background-repeat: no-repeat; border-radius: 1px 3px 3px 1px; }
+.cover.photo::after { background: linear-gradient(90deg, rgba(0,0,0,.3) 0, rgba(0,0,0,0) 2%, rgba(255,255,255,.12) 3%, rgba(0,0,0,.06) 4.5%, rgba(0,0,0,0) 7%); }
+.cover:hover { filter: brightness(1.07); }
+.cover:focus-visible { outline: 3px solid var(--focus); outline-offset: -5px; }
+.c-art { position: absolute; display: block; }
+.c-in { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 11% 11% 10% 14%; }
+.c-title {
+  font-family: var(--ff); font-weight: var(--fw); font-style: var(--fst);
+  text-transform: var(--tt); letter-spacing: var(--ls); line-height: 1.08; text-wrap: balance;
+}
+.c-author { font-family: var(--font-ui); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.3; }
+
+.v0 .c-art { inset: 6% 6% 6% 9%; border: 2px solid var(--ac); }
+.v0 .c-in { text-align: center; justify-content: space-between; padding: 17% 15% 14% 18%; }
+.v1 .c-art { left: 50%; top: 9%; width: 58%; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; background: var(--ac); }
+.v1 .c-in { justify-content: flex-end; gap: 7%; }
+.v2 .c-art { left: 0; right: 0; top: 34%; height: 32%; background: var(--ac); }
+.v2 .c-in { justify-content: flex-end; }
+.v2 .c-title { position: absolute; left: 14%; right: 11%; top: 34%; height: 32%; display: flex; align-items: center; color: var(--oa); }
+.v3 .c-art { left: 0; right: 0; bottom: 0; height: 33%; background: repeating-linear-gradient(90deg, var(--ac) 0 7px, transparent 7px 14px); }
+.v3 .c-in { justify-content: space-between; padding-bottom: 38%; }
+.v4 .c-art { left: 50%; top: 9%; width: 58%; height: 43%; transform: translateX(-50%); border-radius: 999px 999px 0 0; background: var(--ac); }
+.v4 .c-in { justify-content: flex-end; text-align: center; gap: 7%; padding-left: 13%; }
+
+/* Lifting a book off the shelf: it comes forward first, then turns to show the cover. */
+@media (hover: hover) {
+  .slot:not(.open):hover .lift { transform: translate3d(0, -6px, 26px); }
+}
+.slot.open .lift { transform: translate3d(var(--dx, 0px), -16px, var(--z, 170px)); }
+.slot.open .book { transform: rotateY(-90deg); transition-delay: .18s; }
+.slot.settling .lift { transition-delay: .3s; }
+
+/* Catalog card */
+.card {
+  position: fixed; z-index: 60;
+  left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: 600px; margin-inline: auto;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+  padding: 14px 16px; background: var(--card); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: 0 18px 40px -12px rgba(0,0,0,.5);
+}
+.card[hidden] { display: none; }
+.card-text { min-width: 0; flex: 1 1 240px; }
+.card-meta { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card h2 { margin: 2px 0 0; font: 700 22px / 1.15 var(--font-display); text-wrap: balance; }
+.card-author { margin: 2px 0 0; color: var(--muted); }
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px;
+  border: 1px solid var(--accent); border-radius: 6px;
+  background: var(--accent); color: var(--on-accent);
+  font: 700 14px / 1 var(--font-ui); text-decoration: none; cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .case { padding-inline: 12px; }
+  .case::before { margin-inline: -4px; }
+  .plinth { margin-inline: -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift, .book, .slot::after { transition-duration: .01s; transition-delay: 0s !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Finished this year</p>
+      <h1>Read <em>in</em> 2026</h1>
+    </div>
+    <p class="stats" id="stats"></p>
+  </header>
+  <p class="hint">Click a spine to take the book off the shelf. Click its cover to see the rating and reviews on Goodreads.</p>
+
+  <main id="cases"></main>
+</div>
+
+<aside class="card" id="card" hidden aria-live="polite">
+  <div class="card-text">
+    <p class="card-meta" id="cMeta"></p>
+    <h2 id="cTitle"></h2>
+    <p class="card-author" id="cAuthor"></p>
+  </div>
+  <div class="card-actions">
+    <a class="btn" id="cLink" target="_blank" rel="noopener noreferrer">View on Goodreads <span aria-hidden="true">&nbsp;↗</span></a>
+    <button class="btn ghost" id="cBack" type="button">Put back</button>
+  </div>
+</aside>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------
+     YOUR BOOKS, generated from the Goodreads export (Date Read year).
+       title, author, last (author name on the spine), finished, id (Goodreads book id)
+       pages, rating   optional
+       spine, cover    optional photo paths, with sr (spine width / height) and
+                       cr (cover width / height). Without photos the art is generated.
+     ------------------------------------------------------------------ */
+  const YEAR = 2026;
+  const YEARS = [2026, 2025];
+  const DATA = {"2026":[{"title":"The Age of Innocence","author":"Edith Wharton","last":"Wharton","finished":"2026-01-01","id":"22498786","year":2026,"pages":204,"rating":3.0,"spine":"books/aoi-spine.jpg","cover":"books/aoi-cover.jpg","sr":0.181,"cr":0.646},{"title":"Gilead","author":"Marilynne Robinson","last":"Robinson","finished":"2026-01-01","id":"127918224","year":2026,"rating":3.0,"spine":"books/gilead-spine.jpg","cover":"books/gilead-cover.jpg","sr":0.117,"cr":0.64},{"title":"Much Obliged, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-01-01","id":"16394","year":2026,"pages":208,"rating":4.0,"spine":"books/jtb-spine.jpg","cover":"books/jtb-cover.jpg","sr":0.076,"cr":0.677},{"title":"The Shipping News","author":"Annie Proulx","last":"Proulx","finished":"2026-01-27","id":"7354","year":2026,"pages":337,"rating":4.0,"spine":"books/ship-spine.jpg","cover":"books/ship-cover.jpg","sr":0.105,"cr":0.665},{"title":"Rabbit Is Rich","author":"John Updike","last":"Updike","finished":"2026-02-01","id":"85391","year":2026,"pages":480,"rating":5.0,"spine":"books/rir-spine.jpg","sr":0.205,"cover":"books/rir-cover.jpg","cr":0.66},{"title":"Demon Copperhead","author":"Barbara Kingsolver","last":"Kingsolver","finished":"2026-02-01","id":"60194162","year":2026,"pages":560,"rating":5.0,"cover":"books/demon-cover.jpg","cr":0.706,"spine":"books/dc-spine.jpg","sr":0.115},{"title":"Blandings Castle","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"13707660","year":2026,"pages":272,"rating":3.0,"spine":"books/bl-spine.jpg","sr":0.191,"cover":"books/bl-cover.jpg","cr":0.614},{"title":"Football","author":"Chuck Klosterman","last":"Klosterman","finished":"2026-02-01","id":"239522729","year":2026,"pages":304,"rating":3.0,"cover":"books/football-cover.jpg","cr":0.655,"spine":"books/football-spine.jpg","sr":0.115},{"title":"Aunts Aren't Gentlemen","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-02-01","id":"720987","year":2026,"pages":167,"rating":4.0,"spine":"books/aunts-spine.jpg","sr":0.15,"cover":"books/aunts-cover.jpg","cr":0.63},{"title":"Ficciones","author":"Jorge Luis Borges","last":"Borges","finished":"2026-03-01","id":"426504","year":2026,"pages":174,"rating":3.0,"spine":"books/fic-spine.jpg","sr":0.14,"cover":"books/fic-cover.jpg","cr":0.64},{"title":"Summer Lightning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-03-01","id":"13707659","year":2026,"pages":288,"rating":3.0,"spine":"books/sl-spine.jpg","sr":0.18,"cover":"books/sl-cover.jpg","cr":0.62},{"title":"The Stone Diaries","author":"Carol Shields","last":"Shields","finished":"2026-03-01","id":"77554","year":2026,"pages":361,"rating":4.0,"spine":"books/st-spine.jpg","sr":0.18,"cover":"books/st-cover.jpg","cr":0.665},{"title":"Rabbit at Rest","author":"John Updike","last":"Updike","finished":"2026-03-01","id":"11666","year":2026,"pages":606,"rating":5.0,"spine":"books/rar-spine.jpg","cover":"books/rar-cover.jpg","sr":0.217,"cr":0.649},{"title":"Oranges","author":"John McPhee","last":"McPhee","finished":"2026-04-01","id":"54983","year":2026,"pages":160,"rating":4.0},{"title":"Heavy Weather","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707658","year":2026,"pages":288,"rating":4.0,"spine":"books/hw-spine.jpg","sr":0.119,"cover":"books/hw-cover.jpg","cr":0.66},{"title":"The Orphan Master's Son","author":"Adam Johnson","last":"Johnson","finished":"2026-04-01","id":"11529868","year":2026,"pages":443,"rating":4.0},{"title":"Uncle Fred in the Springtime","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-04-01","id":"13707721","year":2026,"pages":242,"rating":4.0},{"title":"Main Street","author":"Sinclair Lewis","last":"Lewis","finished":"2026-05-01","id":"11376","year":2026,"pages":454,"rating":4.0},{"title":"The Sellout","author":"Paul Beatty","last":"Beatty","finished":"2026-05-01","id":"22237161","year":2026,"pages":289,"rating":4.0},{"title":"Meet Mr. Mulliner","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-05-01","id":"18053","year":2026,"pages":203,"rating":3.0},{"title":"The Netanyahus","author":"Joshua Cohen","last":"Cohen","finished":"2026-05-01","id":"55817233","year":2026,"pages":240,"rating":3.0},{"title":"Middlesex","author":"Jeffrey Eugenides","last":"Eugenides","finished":"2026-06-01","id":"2187","year":2026,"pages":529,"rating":5.0},{"title":"Less","author":"Andrew Sean Greer","last":"Greer","finished":"2026-06-01","id":"39927096","year":2026,"pages":273,"rating":3.0},{"title":"Full Moon","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-06-01","id":"16376","year":2026,"pages":272,"rating":3.0},{"title":"Redshirts","author":"John Scalzi","last":"Scalzi","finished":"2026-06-01","id":"13055592","year":2026,"pages":320,"rating":4.0},{"title":"The Overstory","author":"Richard Powers","last":"Powers","finished":"2026-07-01","id":"40180098","year":2026,"pages":502,"rating":4.0},{"title":"Mr. Mulliner Speaking","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-07-01","id":"18041","year":2026,"pages":232,"rating":4.0},{"title":"Cathedral","author":"Raymond Carver","last":"Carver","finished":"2026-07-01","id":"138758152","year":2026,"rating":4.0},{"title":"White Noise","author":"Don DeLillo","last":"DeLillo","finished":"2026-07-01","id":"28251250","year":2026,"pages":320,"rating":2.0},{"title":"Decline and Fall","author":"Evelyn Waugh","last":"Waugh","finished":"2026-08-01","id":"30929","year":2026,"pages":300,"rating":3.0},{"title":"In the Distance","author":"Hernan Diaz","last":"Diaz","finished":"2026-08-01","id":"34381330","year":2026,"pages":256,"rating":4.0},{"title":"Young Men in Spats","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-08-01","id":"16241167","year":2026,"pages":240,"rating":5.0},{"title":"The Sweetness at the Bottom of the Pie","author":"Alan Bradley","last":"Bradley","finished":"2026-08-01","id":"40605285","year":2026,"pages":386,"rating":3.0},{"title":"The Goldfinch","author":"Donna Tartt","last":"Tartt","finished":"2026-09-01","id":"17333223","year":2026,"pages":775,"rating":4.0},{"title":"Here Is New York","author":"E.B. White","last":"White","finished":"2026-09-01","id":"10814","year":2026,"pages":56,"rating":4.0},{"title":"Pigs Have Wings","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"60521","year":2026,"pages":240,"rating":4.0},{"title":"Dungeon Crawler Carl","author":"Matt Dinniman","last":"Dinniman","finished":"2026-09-01","id":"211721806","year":2026,"pages":450,"rating":3.0},{"title":"Sisters of a Halved Heart","author":"Nayantara Roy","last":"Roy","finished":"2026-09-01","id":"242445364","year":2026,"pages":352,"rating":3.0},{"title":"The Stalker","author":"Paula Bomer","last":"Bomer","finished":"2026-09-01","id":"200700624","year":2026,"rating":4.0},{"title":"Mulliner Nights","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-09-01","id":"18016","year":2026,"pages":240,"rating":5.0},{"title":"Perfection","author":"Vincenzo Latronico","last":"Latronico","finished":"2026-10-01","id":"203200544","year":2026,"pages":137,"rating":3.0},{"title":"The Hitchhiker's Guide to the Galaxy","author":"Douglas Adams","last":"Adams","finished":"2026-10-01","id":"11","year":2026,"pages":216,"rating":4.0},{"title":"Uncle Dynamite","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241184","year":2026,"pages":288,"rating":4.0},{"title":"Cocktail Time","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-10-01","id":"16241186","year":2026,"pages":224,"rating":4.0},{"title":"Mrs. Dalloway","author":"Virginia Woolf","last":"Woolf","finished":"2026-10-01","id":"14942","year":2026,"pages":194,"rating":3.25},{"title":"The Brief Wondrous Life of Oscar Wao","author":"Junot Díaz","last":"Díaz","finished":"2026-10-01","id":"297673","year":2026,"pages":335,"rating":3.75},{"title":"The Clicking of Cuthbert","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2026-11-01","id":"898737","year":2026,"pages":174,"rating":4.0}],"2025":[{"title":"The God of the Woods","author":"Liz Moore","last":"Moore","finished":"2025-01-01","id":"199698485","year":2025,"pages":562,"rating":4.0},{"title":"Funny Story","author":"Emily Henry","last":"Henry","finished":"2025-01-01","id":"194802722","year":2025,"pages":395,"rating":3.0},{"title":"Lonesome Dove","author":"Larry McMurtry","last":"McMurtry","finished":"2025-02-01","id":"256008","year":2025,"pages":960,"rating":5.0},{"title":"Harry Potter and the Prisoner of Azkaban","author":"J.K. Rowling","last":"Rowling","finished":"2025-03-01","id":"5","year":2025,"pages":547,"rating":4.0},{"title":"Harry Potter and the Goblet of Fire","author":"J.K. Rowling","last":"Rowling","finished":"2025-04-01","id":"58613424","year":2025,"pages":752,"rating":4.0},{"title":"Pedro Páramo","author":"Juan Rulfo","last":"Rulfo","finished":"2025-04-01","id":"38787","year":2025,"pages":128,"rating":3.0},{"title":"Time and Again","author":"Jack Finney","last":"Finney","finished":"2025-05-01","id":"40526","year":2025,"pages":400,"rating":4.0},{"title":"If on a Winter's Night a Traveler","author":"Italo Calvino","last":"Calvino","finished":"2025-05-01","id":"374233","year":2025,"pages":260,"rating":3.0},{"title":"Right Ho, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-05-01","id":"9850375","year":2025,"pages":257,"rating":5.0},{"title":"Why Marriages Succeed or Fail","author":"John M. Gottman","last":"Gottman","finished":"2025-06-01","id":"56692","year":2025,"pages":240,"rating":4.0},{"title":"Thank You, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"16241200","year":2025,"pages":230,"rating":4.0},{"title":"Stoner","author":"John Williams","last":"Williams","finished":"2025-06-01","id":"166997","year":2025,"pages":292,"rating":4.0},{"title":"The Code of the Woosters","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-06-01","id":"9858081","year":2025,"pages":272,"rating":5.0,"spine":"books/woosters-spine.jpg","cover":"books/woosters-cover.jpg","sr":0.209,"cr":0.665},{"title":"Whose Body?","author":"Dorothy L. Sayers","last":"Sayers","finished":"2025-07-01","id":"192893","year":2025,"pages":224,"rating":3.0},{"title":"Girl, Woman, Other","author":"Bernardine Evaristo","last":"Evaristo","finished":"2025-07-01","id":"41081373","year":2025,"pages":453,"rating":4.0},{"title":"A Gentleman in Moscow","author":"Amor Towles","last":"Towles","finished":"2025-07-01","id":"34066798","year":2025,"pages":495,"rating":4.0,"undated":true},{"title":"Joy in the Morning","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-07-01","id":"9928818","year":2025,"pages":272,"rating":4.0},{"title":"The Mating Season","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-08-01","id":"16390","year":2025,"pages":272,"rating":4.0},{"title":"Angle of Repose","author":"Wallace Stegner","last":"Stegner","finished":"2025-09-01","id":"292408","year":2025,"pages":569,"rating":5.0},{"title":"Remarkably Bright Creatures","author":"Shelby Van Pelt","last":"Van Pelt","finished":"2025-09-01","id":"58733693","year":2025,"pages":360,"rating":4.0},{"title":"The Sound and the Fury","author":"William Faulkner","last":"Faulkner","finished":"2025-09-01","id":"10975","year":2025,"pages":366,"rating":4.0},{"title":"Ring for Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-09-01","id":"18029","year":2025,"pages":240,"rating":3.0},{"title":"Minor Feelings","author":"Cathy Park Hong","last":"Hong","finished":"2025-09-30","id":"52845775","year":2025,"pages":209,"rating":3.0},{"title":"Jesus’ Son","author":"Denis Johnson","last":"Johnson","finished":"2025-10-01","id":"608287","year":2025,"pages":160,"rating":4.0},{"title":"Rabbit, Run","author":"John Updike","last":"Updike","finished":"2025-10-01","id":"40656712","year":2025,"pages":337,"rating":4.0},{"title":"Jeeves and the Feudal Spirit","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-10-01","id":"16375","year":2025,"pages":231,"rating":5.0},{"title":"Olive Kitteridge","author":"Elizabeth Strout","last":"Strout","finished":"2025-10-11","id":"1736739","year":2025,"pages":270,"rating":5.0},{"title":"One Hundred Years of Solitude","author":"Gabriel García Márquez","last":"García Márquez","finished":"2025-10-11","id":"320","year":2025,"pages":417,"rating":3.0},{"title":"The Stranger","author":"Albert Camus","last":"Camus","finished":"2025-11-01","id":"49552","year":2025,"pages":123,"rating":4.0},{"title":"The Remains of the Day","author":"Kazuo Ishiguro","last":"Ishiguro","finished":"2025-11-01","id":"28921","year":2025,"pages":258,"rating":4.0},{"title":"Interpreter of Maladies","author":"Jhumpa Lahiri","last":"Lahiri","finished":"2025-11-01","id":"5439","year":2025,"pages":198,"rating":5.0},{"title":"Rabbit Redux","author":"John Updike","last":"Updike","finished":"2025-11-01","id":"46917","year":2025,"pages":440,"rating":3.0},{"title":"Jeeves in the Offing","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-11-01","id":"16404","year":2025,"pages":200,"rating":4.0},{"title":"Harry Potter and the Order of the Phoenix","author":"J.K. Rowling","last":"Rowling","finished":"2025-11-01","id":"58613451","year":2025,"pages":896,"rating":4.0},{"title":"Something Fresh","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"18025","year":2025,"pages":284,"rating":4.0},{"title":"Leave It to Psmith","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"13707720","year":2025,"pages":293,"rating":4.0},{"title":"A Visit from the Goon Squad","author":"Jennifer Egan","last":"Egan","finished":"2025-12-01","id":"7331435","year":2025,"pages":274,"rating":5.0},{"title":"Shooting Columbo","author":"David Koenig","last":"Koenig","finished":"2025-12-01","id":"58817174","year":2025,"pages":248,"rating":4.0},{"title":"Empire Falls","author":"Richard Russo","last":"Russo","finished":"2025-12-01","id":"187020","year":2025,"pages":483,"rating":5.0},{"title":"Stiff Upper Lip, Jeeves","author":"P.G. Wodehouse","last":"Wodehouse","finished":"2025-12-01","id":"12550","year":2025,"pages":211,"rating":4.0}]};
+
+  // Spine colours: [background, text, accent, text on accent]
+  const PAL = [
+    ["#23443b", "#efe6d0", "#c9a25a", "#23443b"],
+    ["#6b1f2a", "#f1dfd0", "#d9b36c", "#4a1019"],
+    ["#1f2e4d", "#e9eef5", "#e0b44a", "#1f2e4d"],
+    ["#c9962b", "#2a1d0c", "#7a1f1f", "#f6e3c4"],
+    ["#2f6670", "#f4ede0", "#f0c987", "#1c3f46"],
+    ["#54304f", "#f2e3ea", "#e7a3a0", "#3a2037"],
+    ["#e6dfd0", "#2b2a27", "#b0442e", "#fbf2e6"],
+    ["#a4482b", "#f6e7d4", "#2a2a2a", "#f6e7d4"],
+    ["#2c2f33", "#e8e4da", "#d6a24a", "#2c2f33"],
+    ["#8aa08b", "#1d2a21", "#f3efe2", "#1d2a21"],
+    ["#9bb7c9", "#1a2b3a", "#fff6e4", "#1a2b3a"],
+    ["#d7a7a1", "#3b1f20", "#6b1f2a", "#f7e6df"],
+    ["#15171a", "#f0ece2", "#c8503b", "#15171a"],
+    ["#5d6137", "#f1ebd2", "#d9a33a", "#2e3018"]
+  ];
+  // Lettering styles; cw is the average character width as a share of the font size.
+  const TYPE = [
+    { ff: '"Playfair Display", Georgia, serif', fw: 800, fst: "normal", tt: "none", ls: "0", cw: 0.55, cs: 1 },
+    { ff: 'Oswald, "Arial Narrow", sans-serif', fw: 500, fst: "normal", tt: "uppercase", ls: "0.08em", cw: 0.56, cs: 1.12 },
+    { ff: '"Libre Baskerville", Georgia, serif', fw: 700, fst: "normal", tt: "none", ls: "0", cw: 0.58, cs: 0.9 },
+    { ff: '"Bodoni Moda", Didot, serif', fw: 600, fst: "italic", tt: "none", ls: "0", cw: 0.47, cs: 1.08 },
+    { ff: 'Karla, system-ui, sans-serif', fw: 700, fst: "normal", tt: "uppercase", ls: "0.1em", cw: 0.72, cs: 0.82 }
+  ];
+  const P = 900; // perspective, matches the CSS
+
+  const $ = (s) => document.querySelector(s);
+  const casesEl = $("#cases"), card = $("#card");
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hash = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
+  const fmtDate = (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const fmtMonth = (d) => d.toLocaleDateString("en-GB", { month: "short" });
+  const fmtMonthYear = (d) => d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+
+  const books = [].concat.apply([], YEARS.map((y) => DATA[String(y)]))
+    .map((b) => Object.assign({}, b, { date: new Date(b.finished + "T12:00:00") }))
+    .map((b, i) => {
+      const short = b.short || b.title;
+      return Object.assign(b, {
+        i: i, short: short,
+        h0: 216 + (hash(b.title) % 6) * 10,
+        t0: Math.min(56, 24 + Math.round((b.pages || 240) / 16)),
+        pal: PAL[(i * 5 + 3) % PAL.length],
+        type: (i * 2 + (i >> 1)) % 5,
+        variant: (i * 3 + 2) % 5,
+        href: "https://www.goodreads.com/book/show/" + b.id
+      });
+    });
+
+  function statsHTML(y) {
+    const list = books.filter((b) => b.year === y);
+    const pages = list.reduce((s, b) => s + (b.pages || 0), 0);
+    return "<b>" + list.length + "</b> books &nbsp;·&nbsp; <b>" + pages.toLocaleString("en-US") + "</b> pages";
+  }
+  $("#stats").innerHTML = statsHTML(YEARS[0]);
+
+  function fitSpine(b, d) {
+    const T = TYPE[b.type];
+    const afs = Math.max(7, Math.min(10, d.t * 0.26));
+    const room = d.h - 24 - 12 - 8 - 14; // top padding, bottom padding, gaps, mark
+    const attempt = (withAuthor) => {
+      const alen = withAuthor ? b.last.length * afs * 0.74 + 8 : 0;
+      const avail = room - alen;
+      for (let f = Math.min(20, d.t * 0.46); f >= 8; f -= 0.5) {
+        const per = Math.floor(avail / (f * T.cw));
+        if (per < 3) continue;
+        const lines = Math.ceil(b.short.length / (per * 0.86));
+        if (lines * f * 1.14 <= d.t - 10) return { fs: f, avail: avail };
+      }
+      return null;
+    };
+    let showAuthor = d.t >= 26;
+    let fit = attempt(showAuthor);
+    if (!fit && showAuthor) { showAuthor = false; fit = attempt(false); }
+    if (!fit) fit = { fs: 8, avail: room };
+    return { fs: fit.fs, avail: fit.avail, afs: afs, showAuthor: showAuthor };
+  }
+
+  function coverSize(b, d) {
+    const n = b.short.length;
+    const k = n <= 12 ? 0.17 : n <= 22 ? 0.135 : n <= 34 ? 0.108 : 0.09;
+    return { fs: d.w * k * TYPE[b.type].cs, afs: Math.max(8, d.w * 0.058) };
+  }
+
+  function makeSlot(b, d, u) {
+    const T = TYPE[b.type], p = b.pal;
+    const s = fitSpine(b, d), c = coverSize(b, d);
+    const el = document.createElement("div");
+    el.className = "slot";
+    el.dataset.i = b.i;
+    el._d = d; el._u = u;
+    const vars = {
+      "--t": d.t + "px", "--h": d.h + "px", "--w": d.w + "px",
+      "--bg": p[0], "--fg": p[1], "--ac": p[2], "--oa": p[3],
+      "--ff": T.ff, "--fw": T.fw, "--fst": T.fst, "--tt": T.tt, "--ls": T.ls
+    };
+    Object.keys(vars).forEach((k) => el.style.setProperty(k, vars[k]));
+    const label = esc(b.title) + " by " + esc(b.author);
+    const spineBody = b.spine
+      ? ""
+      : '<span class="s-title" style="font-size:' + s.fs.toFixed(1) + "px;max-height:" + Math.floor(s.avail) + 'px">' + esc(b.short) + "</span>" +
+        (s.showAuthor ? '<span class="s-author" style="font-size:' + s.afs.toFixed(1) + 'px">' + esc(b.last) + "</span>" : "") +
+        '<i class="mark"></i>';
+    const coverBody = b.cover
+      ? ""
+      : '<span class="c-art"></span>' +
+        '<span class="c-in"><span class="c-title" style="font-size:' + c.fs.toFixed(1) + 'px">' + esc(b.short) + '</span>' +
+        '<span class="c-author" style="font-size:' + c.afs.toFixed(1) + 'px">' + esc(b.author) + "</span></span>";
+    const spineStyle = b.spine ? ' style="background-image:url(\'' + esc(b.spine) + '\')"' : "";
+    const coverStyle = b.cover ? ' style="background-image:url(\'' + esc(b.cover) + '\')"' : "";
+    el.innerHTML =
+      '<div class="lift"><div class="book">' +
+        '<button type="button" class="face spine' + (b.spine ? " photo" : "") + '"' + spineStyle + ' aria-expanded="false" aria-label="Take ' + label + ' off the shelf">' + spineBody + "</button>" +
+        '<a class="cover v' + b.variant + (b.cover ? " photo" : "") + '"' + coverStyle + ' href="' + esc(b.href) + '" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true" aria-label="' + label + ' on Goodreads, opens in a new tab">' +
+          coverBody +
+        "</a>" +
+      "</div></div>";
+    return el;
+  }
+
+  let slots = [], openIdx = -1, lastW = 0;
+
+  function mk(tag, cls) { const e = document.createElement(tag); e.className = cls; return e; }
+
+  function layout() {
+    openIdx = -1;
+    card.hidden = true;
+    casesEl.textContent = "";
+    lastW = casesEl.clientWidth;
+
+    const parts = YEARS.map((y, yi) => {
+      const sec = mk("section", "year");
+      if (yi > 0) {
+        const hd = mk("div", "head yearhead");
+        hd.innerHTML = '<h2>Read <em>in</em> ' + y + '</h2><p class="stats">' + statsHTML(y) + "</p>";
+        sec.appendChild(hd);
+      }
+      const kase = mk("div", "case"), inside = mk("div", "inside"), plinth = mk("div", "plinth");
+      kase.appendChild(inside); kase.appendChild(plinth); sec.appendChild(kase);
+      casesEl.appendChild(sec);
+      return { y: y, inside: inside };
+    });
+
+    const inner = parts[0].inside.clientWidth || 700;
+    const u = Math.min(1, Math.max(0.72, inner / 780));
+    const gap = 3, usable = inner - 28;
+    const dims = books.map((b) => {
+      const h = Math.round(b.h0 * u);
+      return {
+        h: h,
+        t: b.spine && b.sr ? Math.max(22, Math.round(h * b.sr)) : Math.round(b.t0 * u),
+        w: Math.round(h * (b.cr || 0.66))
+      };
+    });
+
+    slots = new Array(books.length);
+    parts.forEach((part) => {
+      const ids = books.filter((b) => b.year === part.y).map((b) => b.i);
+      const rows = [];
+      let cur = [], used = 0;
+      ids.forEach((i) => {
+        const add = dims[i].t + (cur.length ? gap : 0);
+        if (cur.length && used + add > usable) { rows.push({ idx: cur, used: used }); cur = []; used = 0; }
+        used += dims[i].t + (cur.length ? gap : 0);
+        cur.push(i);
+      });
+      if (cur.length) rows.push({ idx: cur, used: used });
+
+      rows.forEach((r, ri) => {
+        const row = mk("div", "row");
+        const wrap = mk("div", "books");
+        r.idx.forEach((i) => {
+          const s = makeSlot(books[i], dims[i], u);
+          slots[i] = s;
+          wrap.appendChild(s);
+        });
+
+        const left = usable - r.used;
+        const now = new Date();
+        if (ri === rows.length - 1 && left > 150 && part.y === YEAR && now.getFullYear() === YEAR) {
+          const days = Math.ceil((new Date(YEAR, 11, 31) - now) / 864e5);
+          if (days > 0) {
+            const note = mk("span", "room-note");
+            note.style.maxWidth = Math.min(240, left - 16) + "px";
+            note.textContent = "Room for more. " + days + " days left in " + YEAR + ".";
+            wrap.appendChild(note);
+          }
+        }
+
+        const board = mk("div", "board");
+        const m1 = fmtMonth(books[r.idx[0]].date), m2 = fmtMonth(books[r.idx[r.idx.length - 1]].date);
+        const tag = mk("span", "tag");
+        tag.textContent = m1 === m2 ? m1 : m1 + " – " + m2;
+        board.appendChild(tag);
+
+        row.appendChild(wrap);
+        row.appendChild(board);
+        part.inside.appendChild(row);
+      });
+    });
+  }
+
+  function openBook(i) {
+    if (openIdx === i) return;
+    closeBook();
+    const s = slots[i], b = books[i], d = s._d;
+    const z = Math.round(170 + (1 - s._u) * 460);
+    const sc = P / (P - z);
+    const r = s.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const half = (d.w * sc) / 2;
+    const vw = document.documentElement.clientWidth;
+    const m = 8;
+    const target = Math.min(Math.max(cx, m + half), vw - m - half);
+    s.style.setProperty("--z", z + "px");
+    s.style.setProperty("--dx", (target - cx) / sc + "px");
+    s.classList.remove("settling");
+    s.classList.add("open");
+    s.closest(".row").classList.add("has-open");
+    s.querySelector(".spine").setAttribute("aria-expanded", "true");
+    const cover = s.querySelector(".cover");
+    cover.removeAttribute("aria-hidden");
+    cover.tabIndex = 0;
+    openIdx = i;
+
+    const when = b.undated ? "Read in " + b.year : b.finished.slice(8) === "01" ? "Read " + fmtMonthYear(b.date) : "Finished " + fmtDate(b.date);
+    $("#cMeta").textContent = when + (b.pages ? " · " + b.pages + " pages" : "") + (b.rating ? " · ★ " + b.rating : "");
+    $("#cTitle").textContent = b.title;
+    $("#cAuthor").textContent = b.author;
+    $("#cLink").href = b.href;
+    card.hidden = false;
+  }
+
+  function closeBook() {
+    if (openIdx < 0) return;
+    const s = slots[openIdx];
+    const row = s.closest(".row");
+    s.classList.remove("open");
+    s.classList.add("settling");
+    s.querySelector(".spine").setAttribute("aria-expanded", "false");
+    const cover = s.querySelector(".cover");
+    cover.setAttribute("aria-hidden", "true");
+    cover.tabIndex = -1;
+    setTimeout(() => {
+      s.classList.remove("settling");
+      if (!s.classList.contains("open")) row.classList.remove("has-open");
+    }, 1000);
+    openIdx = -1;
+    card.hidden = true;
+  }
+
+  casesEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".spine");
+    if (!btn) return;
+    const i = Number(btn.closest(".slot").dataset.i);
+    if (i === openIdx) closeBook(); else openBook(i);
+  });
+  casesEl.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const btn = e.target.closest(".spine");
+    if (!btn) return;
+    const all = Array.prototype.slice.call(casesEl.querySelectorAll(".spine"));
+    const next = all[all.indexOf(btn) + (e.key === "ArrowRight" ? 1 : -1)];
+    if (next) { e.preventDefault(); next.focus(); }
+  });
+  document.addEventListener("click", (e) => {
+    if (openIdx >= 0 && !e.target.closest(".slot") && !e.target.closest("#card")) closeBook();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && openIdx >= 0) {
+      const spine = slots[openIdx].querySelector(".spine");
+      closeBook();
+      spine.focus();
+    }
+  });
+  $("#cBack").addEventListener("click", closeBook);
+
+  layout();
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(() => {
+      if (Math.abs(casesEl.clientWidth - lastW) > 1) layout();
+    }).observe(casesEl);
+  }
+})();
+</script>
+
+</body></html>
