@@ -152,8 +152,8 @@ h1 em { font-weight: 500; }
 /* Books */
 .slot { position: relative; flex: none; width: var(--t); height: var(--h); perspective: 900px; }
 .slot::after {
-  content: ""; position: absolute; left: -3px; right: -3px; bottom: -5px; height: 9px;
-  background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent);
+  content: ""; position: absolute; left: -2px; right: -2px; bottom: -6px; height: 9px; z-index: -1; /* behind the book, so it never darkens the spine */
+  background: radial-gradient(closest-side, rgba(0,0,0,.4), transparent);
   pointer-events: none; transition: opacity .3s;
 }
 .slot.open { z-index: 30; }

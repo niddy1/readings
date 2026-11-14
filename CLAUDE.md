@@ -69,3 +69,7 @@ How it works (all in the `EDIT MODE` block of the script in `index.html`):
 - The spine is not changed. Re-run `spinegen` for that book if the new cover calls for a new spine.
 - Constants at the top of the block: `GH_REPO`, `GH_BRANCH`, `COVER_MAX_H`, `COVER_QUALITY`.
 - Covers can be added this way for books that had none (e.g. Cathedral, Sisters of a Halved Heart, The Stalker); after that, spinegen can make them a spine.
+
+### Shelf shadow
+
+`.slot::after` in `index.html` draws a small contact shadow under each book. It has `z-index: -1` so it sits behind the book: without that it was painted over the spine and put an identical dark smudge on the bottom of every book (the spine is drawn slightly larger than its slot because of the 3D perspective, so moving the shadow down is not enough).
