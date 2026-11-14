@@ -499,6 +499,128 @@ add(187020, ('bands', [(0, .46, (236, 230, 214)), (.46, 1, (18, 16, 16))]), [
     Gap(20), V(T('Empire Falls', 'cho', 100, (150, 26, 34), bold=1.8)), Gap(50), Crop((.34, .50, .73), h=200), Gap(40),
     V(T('RICHARD RUSSO', 'schb', 40, (240, 234, 218), track=0.24)), Flex(), tiny('VINTAGE', (240, 234, 218), 'pagb', 13, 0.16), Gap(8)])
 
+# ---------- added later: new covers supplied by Ian, and Football
+def frame(color, inset=9, th=2.0, double=True):
+    def fn(im, W, rng):
+        d = ImageDraw.Draw(im)
+        c = tuple(color) + (255,)
+        d.rectangle([inset * S, inset * S, (W - inset) * S, (H - inset) * S], outline=c, width=int(th * S))
+        if double:
+            d.rectangle([(inset + 5) * S, (inset + 5) * S, (W - inset - 5) * S, (H - inset - 5) * S], outline=c, width=max(1, int(th * S * 0.4)))
+    return fn
+
+
+def speckle(amt=14):
+    def fn(im, W, rng):
+        a = np.asarray(im).astype(np.float32)
+        h, w = a.shape[:2]
+        n = cv2.resize(rng.standard_normal((h // 3, w // 3)).astype(np.float32), (w, h), interpolation=cv2.INTER_LINEAR)
+        a[..., :3] += (n * amt)[..., None] + (fbm(h, w, 160 * S, rng, 3) * 10)[..., None]
+        return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
+    return fn
+
+
+def stamp(cover, box, color, h, inset=20):
+    """lift light line-art (gilt stamping) off a dark cloth cover and re-ink it on the spine"""
+    def fn(im, W, y0, rng):
+        c = Image.open(B + cover).convert('L')
+        cw, ch = c.size
+        c = c.crop((int(box[0] * cw), int(box[1] * ch), int(box[2] * cw), int(box[3] * ch)))
+        tw = (W - 2 * inset) * S
+        th = int(tw * c.height / c.width)
+        if th > h * S:
+            th = int(h * S); tw = int(th * c.width / c.height)
+        a = np.asarray(c.resize((int(tw), th), Image.BICUBIC)).astype(np.float32)
+        a = cv2.GaussianBlur(a, (0, 0), 0.8 * S)
+        lo, hi = np.percentile(a, 30), np.percentile(a, 99.5)
+        m = np.clip((a - (lo + 0.38 * (hi - lo))) / (0.22 * (hi - lo)), 0, 1)
+        layer = colorize(Image.fromarray((m * 255).astype(np.uint8)), color)
+        im.alpha_composite(layer, (int(W * S / 2 - tw / 2), int((y0 + h / 2) * S - th / 2)))
+    return fn
+
+
+def bars(top, bottom, w=44, hh=9):
+    def fn(im, W, y0, rng):
+        d = ImageDraw.Draw(im)
+        x0 = (W - w) / 2
+        d.rectangle([x0 * S, y0 * S, (x0 + w) * S, (y0 + hh) * S], fill=tuple(top) + (255,))
+        d.rectangle([x0 * S, (y0 + hh) * S, (x0 + w) * S, (y0 + 2 * hh) * S], fill=tuple(bottom) + (255,))
+    return fn
+
+
+def disc(im, W, y0, rng, r=66):
+    h, w = im.height, im.width
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    cx, cy = W / 2 * S, (y0 + r) * S
+    ang = np.arctan2(yy - cy, xx - cx)
+    wob = 1 + 0.05 * np.sin(ang * 3 + 1) + 0.03 * np.sin(ang * 7)
+    dd = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2) / (r * S * wob)
+    a = np.asarray(im).astype(np.float32)
+    streak = fbm(h, w, 5 * S, rng, 2) * 26 + np.sin(ang * 22 + dd * 30) * 9
+    rim = np.clip((1 - dd) * 30, 0, 1)
+    inner = np.clip((0.66 - np.sqrt((xx - cx - 5 * S) ** 2 + (yy - cy + 3 * S) ** 2) / (r * S)) * 14, 0, 1)
+    col = (236 + streak)[..., None] * np.array([1, 0.99, 0.95], np.float32)
+    col = col * (1 - inner[..., None]) + np.array([178, 174, 164], np.float32) * (0.92 + 0.1 * np.clip(dd, 0, 1))[..., None] * inner[..., None]
+    sh = np.clip((1 - np.sqrt((xx - cx - 4 * S) ** 2 + (yy - cy - 5 * S) ** 2) / (r * S * 1.06)) * 8, 0, 1) * 0.25
+    a[..., :3] *= (1 - sh * (1 - rim))[..., None]
+    a[..., :3] = a[..., :3] * (1 - rim[..., None]) + col * rim[..., None]
+    im.paste(Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA'))
+
+
+PAGES.update({'138758152': 228, '200700624': PAGES.get('200700624') or 256})
+
+CMINT, CMAR, CPINK = (176, 226, 200), (124, 36, 58), (246, 112, 174)
+add(138758152, ('solid', (74, 84, 78)), [
+    Gap(8), Fn(bars(CPINK, BLK), 18), Gap(26),
+    V(T('RAYMOND CARVER', 'advb', 46, CMAR, track=0.04, box=(CMINT, 16, 13), shadow=((40, 34, 44), 2.5, 2.5))), Gap(40),
+    V(T('CATHEDRAL', 'advb', 46, CPINK, track=0.3)), Gap(22), Fn(bars(BLK, BLK, 44, 6), 12), Flex(),
+    Crop((.31, .275, .465), h=190), Gap(34),
+    Hh([T('VINTAGE', 'herb', 12.5, WHT, track=0.3), T('CONTEMPORARIES', 'herb', 11, WHT, track=0.08)], gap=6), Gap(10)],
+    under=[speckle()], fin=dict(PBO, creases=3, crease_strength=.35))
+
+add(60194162, ('solid', (240, 233, 212)), [
+    Gap(34), V([T('DEMON COPPERHEAD', 'hcnb', 80, (204, 60, 44), track=0.05),
+               T('BARBARA KINGSOLVER', 'hcnb', 72, (32, 80, 160), track=0.05)], gap=26), Flex(),
+    Crop((.27, .795, .935), h=170, inset=22, border=(30, 30, 30)), Gap(34), tiny('HARPER', (30, 30, 30), 'herb', 14), Gap(26)],
+    cover='demon-cover.jpg', over=[frame((30, 30, 30), 9, 2.2)], fin=HC, side=60)
+
+add(242445364, ('solid', (252, 190, 17)), [
+    Gap(20), V([T('SISTERS OF A', 'advb', 50, BLK, track=0.1), T('HALVED HEART', 'advb', 50, BLK, track=0.1)], gap=16), Gap(30),
+    Crop((.5, .50, .84), h=270), Gap(30), V(T('NAYANTARA ROY', 'advb', 38, BLK, track=0.1)), Flex()], fin=HC)
+
+add(200700624, ('solid', (242, 195, 205)), [
+    Gap(36), V(T('The Stalker', 'terb', 78, BLK)), Gap(40), Fn(disc, 132), Gap(40),
+    V(T('Paula Bomer', 'terb', 54, BLK)), Flex(), tiny('SOHO', BLK, 'terb', 15, 0.24), Gap(10)], fin=dict(PB, gloss=.05))
+
+SLN = (22, 44, 68)
+add(13707659, ('solid', (208, 84, 94)), [
+    Gap(6), Rule(SLN, 2, 0), Gap(30),
+    V([T('SUMMER LIGHTNING', 'herb', 52, SLN, track=0.12), T('P. G. WODEHOUSE', 'herb', 52, SLN, track=0.17)], gap=22), Gap(30), Rule(SLN, 2, 0), Flex(),
+    Crop((.60, .47, .70), h=230, border=SLN), Gap(30), tiny('NORTON', SLN, 'herb', 14), Gap(8)],
+    cover='sl-cover.jpg', fin=PB)
+
+CG = (226, 194, 108)
+add(898737, ('solid', (44, 124, 106)), [
+    Gap(18), Rule(CG, 2.5, 14, True), Gap(34),
+    V([T('THE CLICKING', 'pagb', 58, CG, track=0.06, soft=((14, 60, 48), 2, 0.8)), T('OF CUTHBERT', 'pagb', 58, CG, track=0.06, soft=((14, 60, 48), 2, 0.8))], gap=18), Gap(30), Rule(CG, 1.5, 40), Gap(30),
+    V(T('P. G. WODEHOUSE', 'pagb', 42, CG, track=0.1, soft=((14, 60, 48), 2, 0.8))), Flex(),
+    Fn(stamp('898737-cover.jpg', (.20, .56, .56, .89), CG, 190, inset=14), 190), Gap(26), Rule(CG, 2.5, 14, True), Gap(18)],
+    cloth=9, fin=CLOTH)
+
+add(7354, ('solid', (208, 213, 217)), [
+    Gap(14), Hh([T('4th', 'herb', 22, WHT, box=((96, 160, 210), 9, 9))]), Gap(30),
+    V([T('Annie Proulx', 'popm', 52, (40, 58, 150)), T('The Shipping News', 'popm', 52, (34, 122, 200))], gap=18), Flex(),
+    Crop((.36, .55, 1.0), h=360)], cover='ship-cover.jpg', bot=0, fin=PB)
+
+FG = (224, 182, 98)
+add(239522729, ('solid', (140, 33, 22)), [
+    Gap(44), V(T('FOOTBALL', 'advb', 60, FG, track=0.22, soft=((60, 10, 6), 2, 0.8))), Gap(46),
+    Fn(stamp('football-cover.jpg', (.27, .33, .73, .56), FG, 150, inset=14), 150), Gap(46),
+    V(T('CHUCK KLOSTERMAN', 'advb', 39, FG, track=0.14, soft=((60, 10, 6), 2, 0.8))), Flex(),
+    Hh([T('PENGUIN', 'advb', 12, FG, track=0.16), T('PRESS', 'advb', 12, FG, track=0.16)], gap=6), Gap(30)],
+    cover='football-cover.jpg', cloth=8, over=[frame(FG, 9, 2.0)], fin=dict(CLOTH, hinge=True))
+
+
 if __name__ == '__main__':
     only = sys.argv[1:]
     for k, sp in SPECS.items():

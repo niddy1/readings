@@ -140,7 +140,7 @@ def cloth(a, rng, amt=7):
 
 
 def build(spec, out=None):
-    cover = B + f"{spec['id']}-cover.jpg"
+    cover = B + spec.get('cover', f"{spec['id']}-cover.jpg")
     W = spec.get('W') or int(round(H * sr_for(spec.get('pages'))))
     seed = spec.get('seed', sum(map(ord, str(spec['id']))))
     rng = np.random.default_rng(seed)

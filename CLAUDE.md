@@ -14,12 +14,13 @@ Every book on the shelf is drawn from its spine image. In the `DATA` block of `i
 - `spine`: path to the spine picture, e.g. `books/2187-spine-b.jpg`.
 - `sr`: spine ratio, the picture's width divided by its height (0.15 means the spine is drawn 15% as wide as it is tall).
 
-A book with no `spine` falls back to the page's generated coloured spine. Three books are in that state because they have no cover image in `books/`: Cathedral, Sisters of a Halved Heart, The Stalker.
+A book with no `spine` falls back to the page's generated coloured spine. Every book currently has a cover and a spine.
 
 There are three kinds of spine file in `books/`:
 
 - `<name>-spine.jpg` with a short name (`aoi`, `woosters`, ...): real photographs. Leave these alone.
-- `<id>-spine-b.jpg`: 69 designed spines, made in November 2026 by the scripts in `spinegen/`. These are what `index.html` uses.
+- `<id>-spine-b.jpg`: 76 designed spines, made in November 2026 by the scripts in `spinegen/`. These are what `index.html` uses for those books.
+- Ian replaced the covers of Demon Copperhead, Summer Lightning and The Shipping News and asked for designed spines to match, and for Football's spine to be redone. Their old spine files (`dc-spine.jpg`, `sl-spine.jpg`, `ship-spine.jpg`, `football-spine.jpg`) are still in `books/` but unused.
 - `<id>-spine.jpg` with a numeric id (8 files): an earlier generated attempt from `tools/`. No longer referenced by `index.html`. `tools/` is superseded by `spinegen/`.
 
 ### How the `-spine-b` images are made
@@ -29,7 +30,7 @@ They are original designs matched to each cover's colours, type and feel, not co
 - `spinegen/lib.py`: text rendering, and `finish()`, which adds paper grain, spine-curve lighting, paperback creases and edge wear, then saves the JPEG. Wear is randomised per book (seeded by id) so no two spines share a pattern; do not add any shading that is identical on every book.
 - `spinegen/eng.py`: layout engine. A spine is a background plus a top-to-bottom list of items (vertical text, horizontal text, cover crop, rule, gap, flex spacer). Text shrinks automatically to fit.
 - `spinegen/first8.py`: hand-built designs for Uncle Fred in the Springtime, Middlesex, The Goldfinch, The Hitchhiker's Guide, The Overstory, White Noise, Lonesome Dove, Mrs. Dalloway.
-- `spinegen/rest.py`: one spec per book for the other 61, including the shared template for the cream Wodehouse series (`ev(...)`).
+- `spinegen/rest.py`: one spec per book for the other 61, including the shared template for the cream Wodehouse series (`ev(...)`). The last block ("added later") holds 8 more: Cathedral, Demon Copperhead, Sisters of a Halved Heart, The Stalker, Summer Lightning, The Clicking of Cuthbert (redone for its new green cloth cover), The Shipping News and Football. A spec can pass `cover='name-cover.jpg'` when the cover file isn't named by id. `stamp(...)` lifts gilt line-art off a cloth cover and re-inks it on the spine.
 
 Run from the repo root; with no arguments each script renders everything, or pass keys/ids to render some:
 
@@ -49,7 +50,7 @@ Needs Python 3 with Pillow, NumPy and OpenCV (`pip install pillow numpy opencv-p
 
 ### Adding a spine for a new book
 
-1. Put the cover at `books/<id>-cover.jpg` (or upload it through edit mode, below).
+1. Put the cover at `books/<id>-cover.jpg` (or upload it through edit mode, below). If added by hand, shrink it to at most 900px tall first, and when replacing an existing cover file change the `?v=` suffix on its `cover` path in `index.html` so browsers fetch the new one.
 2. Add a spec to `spinegen/rest.py` (copy a similar book) and run `python3 spinegen/rest.py <id>`.
 3. In `index.html`, set the book's `spine` to `books/<id>-spine-b.jpg` and `sr` to the image's width ÷ height.
 
